@@ -1,0 +1,49 @@
+<mxfile>
+    <diagram id="class_diagram" name="Class Diagram">
+        <mxGraphModel dx="1100" dy="700" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="900" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="c_trackplayer" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;b&gt;TrackPlayer&lt;/b&gt;&lt;/p&gt;&lt;hr size=&quot;1&quot; /&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;- window : Tk&lt;/p&gt;&lt;hr size=&quot;1&quot; /&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ __init__(window)&lt;br&gt;+ open_view_tracks_oop()&lt;br&gt;+ open_create_tracklist()&lt;br&gt;+ open_update_tracks()&lt;/p&gt;" style="verticalAlign=top;align=left;overflow=fill;fontSize=12;fontFamily=Helvetica;html=1;whiteSpace=wrap;" parent="1" vertex="1">
+                    <mxGeometry x="440" y="30" width="220" height="140" as="geometry"/>
+                </mxCell>
+                <mxCell id="c_trackviewer" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;b&gt;TrackViewer&lt;/b&gt;&lt;/p&gt;&lt;hr size=&quot;1&quot; /&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;- window : Toplevel&lt;br&gt;- library : TrackLibrary&lt;br&gt;- track_input : StringVar&lt;br&gt;- search_input : StringVar&lt;br&gt;- artists_filter_input : StringVar&lt;br&gt;- status_text : StringVar&lt;br&gt;- list_text : Text&lt;br&gt;- detail_text : Text&lt;/p&gt;&lt;hr size=&quot;1&quot; /&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ __init__(window)&lt;br&gt;+ set_text(text_area, content)&lt;br&gt;+ list_tracks()&lt;br&gt;+ view_tracks()&lt;br&gt;+ search_tracks()&lt;br&gt;+ filter_tracks()&lt;br&gt;+ clear_all()&lt;/p&gt;" style="verticalAlign=top;align=left;overflow=fill;fontSize=12;fontFamily=Helvetica;html=1;whiteSpace=wrap;" parent="1" vertex="1">
+                    <mxGeometry x="40" y="240" width="230" height="310" as="geometry"/>
+                </mxCell>
+                <mxCell id="c_createtracklist" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;b&gt;CreateTracklist&lt;/b&gt;&lt;/p&gt;&lt;hr size=&quot;1&quot; /&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;- window : Toplevel&lt;br&gt;- library : TrackLibrary&lt;br&gt;- track_input : StringVar&lt;br&gt;- tracklist_position : StringVar&lt;br&gt;- tracklist : list&lt;br&gt;- status_text : StringVar&lt;br&gt;- tracklist_text : Text&lt;/p&gt;&lt;hr size=&quot;1&quot; /&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ __init__(window)&lt;br&gt;+ set_text(text_area, content)&lt;br&gt;+ _format_tracklist()&lt;br&gt;+ add_track()&lt;br&gt;+ remove_track()&lt;br&gt;+ play_tracklist()&lt;br&gt;+ play_track()&lt;br&gt;+ play_specific_track()&lt;br&gt;+ shuffle_tracklist()&lt;br&gt;+ reset_tracklist()&lt;/p&gt;" style="verticalAlign=top;align=left;overflow=fill;fontSize=12;fontFamily=Helvetica;html=1;whiteSpace=wrap;" parent="1" vertex="1">
+                    <mxGeometry x="330" y="240" width="230" height="370" as="geometry"/>
+                </mxCell>
+                <mxCell id="c_updatetracks" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;b&gt;UpdateTracks&lt;/b&gt;&lt;/p&gt;&lt;hr size=&quot;1&quot; /&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;- window : Toplevel&lt;br&gt;- library : TrackLibrary&lt;br&gt;- track_input : StringVar&lt;br&gt;- rating_input : StringVar&lt;br&gt;- status_text : StringVar&lt;br&gt;- output : Text&lt;/p&gt;&lt;hr size=&quot;1&quot; /&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ __init__(window)&lt;br&gt;+ set_text(text_area, content)&lt;br&gt;+ update_track()&lt;/p&gt;" style="verticalAlign=top;align=left;overflow=fill;fontSize=12;fontFamily=Helvetica;html=1;whiteSpace=wrap;" parent="1" vertex="1">
+                    <mxGeometry x="620" y="240" width="230" height="240" as="geometry"/>
+                </mxCell>
+                <mxCell id="c_tracklibrary" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;b&gt;TrackLibrary&lt;/b&gt;&lt;/p&gt;&lt;hr size=&quot;1&quot; /&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;- library : dict[str, LibraryItem]&lt;/p&gt;&lt;hr size=&quot;1&quot; /&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ __init__()&lt;br&gt;+ get_name(track_number)&lt;br&gt;+ get_artist(track_number)&lt;br&gt;+ get_rating(track_number)&lt;br&gt;+ get_play_count(track_number)&lt;br&gt;+ set_rating(track_number, rating)&lt;br&gt;+ increment_play_count(track_number)&lt;br&gt;+ list_all()&lt;br&gt;+ list_artists()&lt;br&gt;+ search_tracks(query)&lt;br&gt;+ filter_by_artist(artist)&lt;/p&gt;" style="verticalAlign=top;align=left;overflow=fill;fontSize=12;fontFamily=Helvetica;html=1;whiteSpace=wrap;" parent="1" vertex="1">
+                    <mxGeometry x="330" y="680" width="230" height="240" as="geometry"/>
+                </mxCell>
+                <mxCell id="c_libraryitem" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;b&gt;LibraryItem&lt;/b&gt;&lt;/p&gt;&lt;hr size=&quot;1&quot; /&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;- name : str&lt;br&gt;- artist : str&lt;br&gt;- rating : int&lt;br&gt;- play_count : int&lt;/p&gt;&lt;hr size=&quot;1&quot; /&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ __init__(name, artist, rating, play_count)&lt;br&gt;+ __repr__() : str&lt;br&gt;+ stars() : str&lt;/p&gt;" style="verticalAlign=top;align=left;overflow=fill;fontSize=12;fontFamily=Helvetica;html=1;whiteSpace=wrap;" parent="1" vertex="1">
+                    <mxGeometry x="700" y="710" width="270" height="180" as="geometry"/>
+                </mxCell>
+                <mxCell id="e_tp_tv" value="&lt;&lt;creates&gt;&gt;" style="endArrow=open;endFill=0;endSize=8;html=1;dashed=1;edgeStyle=orthogonalEdgeStyle;entryX=0.5;entryY=0;exitX=0;exitY=0.5;" parent="1" source="c_trackplayer" target="c_trackviewer" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e_tp_ct" value="&lt;&lt;creates&gt;&gt;" style="endArrow=open;endFill=0;endSize=8;html=1;dashed=1;edgeStyle=orthogonalEdgeStyle;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" parent="1" source="c_trackplayer" target="c_createtracklist" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e_tp_ut" value="&lt;&lt;creates&gt;&gt;" style="endArrow=open;endFill=0;endSize=8;html=1;dashed=1;edgeStyle=orthogonalEdgeStyle;entryX=0.5;entryY=0;exitX=1;exitY=0.5;" parent="1" source="c_trackplayer" target="c_updatetracks" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e_tv_lib" value="" style="endArrow=open;endFill=0;endSize=12;html=1;edgeStyle=orthogonalEdgeStyle;exitX=0.5;exitY=1;entryX=0;entryY=0.3;" parent="1" source="c_trackviewer" target="c_tracklibrary" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e_ct_lib" value="" style="endArrow=open;endFill=0;endSize=12;html=1;edgeStyle=orthogonalEdgeStyle;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" parent="1" source="c_createtracklist" target="c_tracklibrary" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e_ut_lib" value="" style="endArrow=open;endFill=0;endSize=12;html=1;edgeStyle=orthogonalEdgeStyle;exitX=0.5;exitY=1;entryX=1;entryY=0.3;" parent="1" source="c_updatetracks" target="c_tracklibrary" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e_lib_item" value="1..*" style="endArrow=diamond;endFill=1;endSize=12;html=1;edgeStyle=orthogonalEdgeStyle;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" parent="1" source="c_tracklibrary" target="c_libraryitem" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>
