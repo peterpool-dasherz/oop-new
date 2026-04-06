@@ -14,6 +14,7 @@ class CreateTracklist:
         self.window.geometry("1100x560")
         self.library = lib.TrackLibrary()
         self.track_input = tk.StringVar()
+        self.custom_track_input = tk.StringVar()
         self.tracklist_position = tk.StringVar()
         self.tracklist = []
         self.status_text = tk.StringVar(value = "Please insert track number to add tracks to your tracklist")
@@ -50,6 +51,13 @@ class CreateTracklist:
         load_tracklist_button = ttk.Button(controls, text = "Load Tracklist", command = self.load_tracklist)
         load_tracklist_button.grid(row = 2, column = 3, padx = 5, pady = 4)
 
+        custom_track_label = ttk.Label(controls, text = "Custom Track")
+        custom_track_label.grid(row = 3, column = 0, sticky = "w", padx = (0, 5), pady = 4)
+        custom_track_entry = ttk.Entry(controls, width = 24, textvariable = self.custom_track_input)
+        custom_track_entry.grid(row = 3, column = 1, columnspan = 2, sticky = "w", padx = (0, 10), pady = 4)
+        custom_track_button = ttk.Button(controls, text = "Add Custom Track", command = self.add_custom_track)
+        custom_track_button.grid(row = 3, column = 3, padx = 5, pady = 4)
+
 
         self.tracklist_text = tk.Text(window, height = 18, width = 90)
         self.tracklist_text.pack(fill = "both", expand = True, padx = 10, pady = (0, 5))
@@ -80,6 +88,18 @@ class CreateTracklist:
         self.tracklist.append((track_number, name))
         self._refresh_tracklist_text()
         self.status_text.set(f"Added '{name}' to tracklist.")
+
+    def add_custom_track(self):
+        custom_name = self.custom_track_input.get().strip()
+        if not custom_name:
+            self.status_text.set("Please enter a custom track name.")
+            return
+
+        custom_track_id = f"CUST{len(self.tracklist) + 1:03d}"
+        self.tracklist.append((custom_track_id, custom_name))
+        self._refresh_tracklist_text()
+        self.custom_track_input.set("")
+        self.status_text.set(f"Added custom track '{custom_name}' to tracklist.")
 
     def play_tracklist(self):
         if not self.tracklist:
@@ -161,7 +181,9 @@ class CreateTracklist:
                 for row in reader:
                     track_number = row["track_number"].strip()
                     normalised_number = track_number.zfill(2) if track_number.isdigit() else track_number
-                    name = self.library.get_name(normalised_number)
+                    name = row.get("name", "").strip()
+                    if not name:
+                        name = self.library.get_name(normalised_number)
                     if name:
                         loaded_tracklist.append((normalised_number, name))
 
