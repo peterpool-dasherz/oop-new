@@ -8,7 +8,7 @@
           <mxGeometry height="80" width="40" x="20" y="550" as="geometry" />
         </mxCell>
         <mxCell id="system_boundary" parent="1" style="swimlane;whiteSpace=wrap;html=1;startSize=30;fontSize=14;fontStyle=1;" value="JukeBox System" vertex="1">
-          <mxGeometry height="1260" width="950" x="160" y="20" as="geometry" />
+          <mxGeometry height="1450" width="950" x="160" y="20" as="geometry" />
         </mxCell>
         <mxCell id="subsystem_player" parent="system_boundary" style="swimlane;whiteSpace=wrap;html=1;startSize=25;fillColor=#f8cecc;strokeColor=#b85450;" value="&lt;b&gt;TrackPlayer (Main UI)&lt;/b&gt;" vertex="1">
           <mxGeometry height="220" width="240" x="40" y="40" as="geometry" />
@@ -44,7 +44,7 @@
           <mxGeometry height="50" width="140" x="50" y="60" as="geometry" />
         </mxCell>
         <mxCell id="subsystem_tracklist" parent="system_boundary" style="swimlane;whiteSpace=wrap;html=1;startSize=25;fillColor=#d5e8d4;strokeColor=#82b366;" value="&lt;b&gt;CreateTracklist&lt;/b&gt;" vertex="1">
-          <mxGeometry height="430" width="240" x="40" y="800" as="geometry" />
+          <mxGeometry height="580" width="240" x="40" y="800" as="geometry" />
         </mxCell>
         <mxCell id="uc_add_track" parent="subsystem_tracklist" style="ellipse;whiteSpace=wrap;html=1;" value="Add Track to Tracklist" vertex="1">
           <mxGeometry height="50" width="140" x="50" y="30" as="geometry" />
@@ -64,8 +64,14 @@
         <mxCell id="uc_shuffle" parent="subsystem_tracklist" style="ellipse;whiteSpace=wrap;html=1;" value="Shuffle Play" vertex="1">
           <mxGeometry height="50" width="140" x="50" y="330" as="geometry" />
         </mxCell>
+        <mxCell id="uc_save_tracklist" parent="subsystem_tracklist" style="ellipse;whiteSpace=wrap;html=1;" value="Save Tracklist" vertex="1">
+          <mxGeometry height="50" width="140" x="50" y="390" as="geometry" />
+        </mxCell>
+        <mxCell id="uc_load_tracklist" parent="subsystem_tracklist" style="ellipse;whiteSpace=wrap;html=1;" value="Load Tracklist" vertex="1">
+          <mxGeometry height="50" width="140" x="50" y="450" as="geometry" />
+        </mxCell>
         <mxCell id="uc_reset" parent="subsystem_tracklist" style="ellipse;whiteSpace=wrap;html=1;" value="Reset Tracklist" vertex="1">
-          <mxGeometry height="50" width="140" x="50" y="380" as="geometry" />
+          <mxGeometry height="50" width="140" x="50" y="510" as="geometry" />
         </mxCell>
         <mxCell id="subsystem_library" parent="system_boundary" style="swimlane;whiteSpace=wrap;html=1;startSize=25;fillColor=#e1d5e7;strokeColor=#9673a6;" value="&lt;b&gt;TrackLibrary (Backend)&lt;/b&gt;" vertex="1">
           <mxGeometry height="250" width="260" x="590" y="470" as="geometry" />
@@ -148,6 +154,12 @@
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="e_ct6" edge="1" parent="1" source="actor_user" style="html=1;endArrow=none;endFill=0;" target="uc_shuffle">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_ct8" edge="1" parent="1" source="actor_user" style="html=1;endArrow=none;endFill=0;" target="uc_save_tracklist">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e_ct9" edge="1" parent="1" source="actor_user" style="html=1;endArrow=none;endFill=0;" target="uc_load_tracklist">
           <mxGeometry relative="1" as="geometry" />
         </mxCell>
         <mxCell id="e_ct7" edge="1" parent="1" source="actor_user" style="html=1;endArrow=none;endFill=0;" target="uc_reset">
