@@ -1,5 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
+import csv
+from pathlib import Path
 import random
 import font_manager as font
 import track_library_oop as lib
@@ -9,12 +11,13 @@ class CreateTracklist:
     def __init__(self, window):
         self.window = window
         self.window.title("Create Tracklist")
-        self.window.geometry("1100x500")
+        self.window.geometry("1100x560")
         self.library = lib.TrackLibrary()
         self.track_input = tk.StringVar()
         self.tracklist_position = tk.StringVar()
         self.tracklist = []
         self.status_text = tk.StringVar(value = "Please insert track number to add tracks to your tracklist")
+        self.tracklist_file = Path(__file__).with_name("saved_tracklist.csv")
 
         controls = ttk.Frame(window, padding = 10)
         controls.pack(fill = "x")
@@ -42,11 +45,17 @@ class CreateTracklist:
         reset_tracklist_button = ttk.Button(controls, text = "Reset Tracklist", command = self.reset_tracklist)
         reset_tracklist_button.grid(row = 1, column = 5, padx = 5, pady = 4)
 
+        save_tracklist_button = ttk.Button(controls, text = "Save Tracklist", command = self.save_tracklist)
+        save_tracklist_button.grid(row = 2, column = 2, padx = 5, pady = 4)
+        load_tracklist_button = ttk.Button(controls, text = "Load Tracklist", command = self.load_tracklist)
+        load_tracklist_button.grid(row = 2, column = 3, padx = 5, pady = 4)
+
 
         self.tracklist_text = tk.Text(window, height = 18, width = 90)
         self.tracklist_text.pack(fill = "both", expand = True, padx = 10, pady = (0, 5))
         self.set_text(self.tracklist_text, "")
         ttk.Label(window, textvariable = self.status_text, padding = (10, 8)).pack(fill = "x")
+        self.load_tracklist(auto_load = True)
 
     def set_text(self, text_area, content):
         text_area.configure(state = "normal")
@@ -58,6 +67,9 @@ class CreateTracklist:
         lines = [f"{index + 1}. {name} ({track_number})" for index, (track_number, name) in enumerate(self.tracklist)]
         return "\n".join(lines)
 
+    def _refresh_tracklist_text(self):
+        self.set_text(self.tracklist_text, self._format_tracklist())
+
     def add_track(self):
         raw = self.track_input.get().strip()
         track_number = raw.zfill(2) if raw.isdigit() else raw
@@ -66,7 +78,7 @@ class CreateTracklist:
             self.status_text.set("Invalid track number, please enter a valid track number.")
             return
         self.tracklist.append((track_number, name))
-        self.set_text(self.tracklist_text, self._format_tracklist())
+        self._refresh_tracklist_text()
         self.status_text.set(f"Added '{name}' to tracklist.")
 
     def play_tracklist(self):
@@ -79,7 +91,7 @@ class CreateTracklist:
 
     def reset_tracklist(self):
         self.tracklist.clear()
-        self.set_text(self.tracklist_text, "")
+        self._refresh_tracklist_text()
         self.status_text.set("Tracklist reset.")
     
     def play_track(self):
@@ -99,7 +111,7 @@ class CreateTracklist:
             self.status_text.set("Need at least 2 tracks to shuffle.")
             return
         random.shuffle(self.tracklist)
-        self.set_text(self.tracklist_text, self._format_tracklist())
+        self._refresh_tracklist_text()
         self.status_text.set("Tracklist shuffled.")
 
     def remove_track(self):
@@ -108,7 +120,7 @@ class CreateTracklist:
         for index, (saved_track_number, name) in enumerate(self.tracklist):
             if saved_track_number == track_number:
                 del self.tracklist[index]
-                self.set_text(self.tracklist_text, self._format_tracklist())
+                self._refresh_tracklist_text()
                 self.status_text.set(f"Removed '{name}' from tracklist.")
                 return
         self.status_text.set("Track not found in tracklist.")
@@ -125,6 +137,41 @@ class CreateTracklist:
         track_number, name = self.tracklist[position - 1]
         self.library.increment_play_count(track_number)
         self.status_text.set(f"Played '{name}'.")
+
+    def save_tracklist(self):
+        try:
+            with self.tracklist_file.open("w", newline="", encoding="utf-8") as file:
+                writer = csv.writer(file)
+                writer.writerow(["track_number", "name"])
+                writer.writerows(self.tracklist)
+            self.status_text.set(f"Tracklist saved to {self.tracklist_file.name}.")
+        except OSError:
+            self.status_text.set("Could not save tracklist.")
+
+    def load_tracklist(self, auto_load = False):
+        if not self.tracklist_file.exists():
+            if not auto_load:
+                self.status_text.set("No saved tracklist found.")
+            return
+
+        try:
+            loaded_tracklist = []
+            with self.tracklist_file.open("r", newline="", encoding="utf-8") as file:
+                reader = csv.DictReader(file)
+                for row in reader:
+                    track_number = row["track_number"].strip()
+                    normalised_number = track_number.zfill(2) if track_number.isdigit() else track_number
+                    name = self.library.get_name(normalised_number)
+                    if name:
+                        loaded_tracklist.append((normalised_number, name))
+
+            self.tracklist = loaded_tracklist
+            self._refresh_tracklist_text()
+            if not auto_load:
+                self.status_text.set(f"Tracklist loaded from {self.tracklist_file.name}.")
+        except (OSError, KeyError):
+            if not auto_load:
+                self.status_text.set("Could not load saved tracklist.")
 
 if __name__ == "__main__":
     root = tk.Tk()
