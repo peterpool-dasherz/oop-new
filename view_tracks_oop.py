@@ -6,11 +6,11 @@ import track_library_oop as lib
 
 
 class TrackViewer:
-    def __init__(self, window):
+    def __init__(self, window, library=None):
         self.window = window
         self.window.title("View Tracks")
         self.window.geometry("900x500")
-        self.library = lib.TrackLibrary()
+        self.library = library or lib.TrackLibrary()
 
         self.track_input = tk.StringVar()
         self.search_input = tk.StringVar()
@@ -30,7 +30,14 @@ class TrackViewer:
         search_button = ttk.Button(controls, text = "Search", command = self.search_tracks).grid(row = 1, column = 3, padx = 10, pady = 4)
 
         filter_by_artist_label = ttk.Label(controls, text = "Filter by Artist").grid(row = 1, column = 4, padx = (20, 5), pady = 4)
-        self.artists_filter_combobox = ttk.Combobox(controls, width = 22, textvariable = self.artists_filter_input, values = ["All artists", *self.library.list_artists()], state = "readonly").grid(row = 1, column = 5, pady = 4)
+        self.artists_filter_combobox = ttk.Combobox(
+            controls,
+            width = 22,
+            textvariable = self.artists_filter_input,
+            values = ["All artists", *self.library.list_artists()],
+            state = "readonly"
+        )
+        self.artists_filter_combobox.grid(row = 1, column = 5, pady = 4)
         filter_button = ttk.Button(controls, text = "Apply", command = self.filter_tracks).grid(row = 1, column = 6, padx = 10, pady = 4)
 
         content = ttk.Frame(self.window, padding = (10, 0, 10, 0))
@@ -44,6 +51,7 @@ class TrackViewer:
 
         status_bar = ttk.Label(self.window, textvariable = self.status_text, padding = (10, 8))
         status_bar.pack(fill = "x")
+        self.refresh_artist_options()
 
     def set_text(self, text_area, content):
         text_area.configure(state = "normal")
@@ -51,10 +59,15 @@ class TrackViewer:
         text_area.insert("1.0", content)
         text_area.configure(state = "disabled")
 
+    def refresh_artist_options(self):
+        self.artists_filter_combobox["values"] = ["All artists", *self.library.list_artists()]
+
     def list_tracks(self):
+        self.refresh_artist_options()
         self.set_text(self.list_text, self.library.list_all())
         self.artists_filter_input.set("All artists")
         self.status_text.set("List tracks button was clicked (all tracks displayed)")
+        self.refresh_artist_options()
     
     def view_tracks(self):
         raw_track = self.track_input.get().strip()
@@ -91,6 +104,7 @@ class TrackViewer:
         self.status_text.set(f"{count} tracks matched with request (Search button was clicked)")
 
     def filter_tracks(self):
+        self.refresh_artist_options()
         selected_artist = self.artists_filter_input.get().strip()
         if selected_artist == "All artists":
             self.list_tracks()
@@ -104,6 +118,7 @@ class TrackViewer:
         self.set_text(self.list_text, filter_result)
         count = len(filter_result.splitlines())
         self.status_text.set(f"{count} tracks matched with request (Filter button was clicked)")
+        self.refresh_artist_options()
 
     def clear_all(self):
         self.set_text(self.list_text, "")
@@ -112,7 +127,6 @@ class TrackViewer:
         self.search_input.set("")
         self.artists_filter_input.set("All artists")
         self.status_text.set("All fields cleared")
-
 if __name__ == "__main__":
     main_window = tk.Tk()
     font.configure()

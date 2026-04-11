@@ -8,17 +8,19 @@ import track_library_oop as lib
 
 
 class CreateTracklist:
-    def __init__(self, window):
+    def __init__(self, window, library=None):
         self.window = window
         self.window.title("Create Tracklist")
         self.window.geometry("1100x560")
-        self.library = lib.TrackLibrary()
+        self.library = library or lib.TrackLibrary()
         self.track_input = tk.StringVar()
-        self.custom_track_input = tk.StringVar()
         self.tracklist_position = tk.StringVar()
         self.tracklist = []
         self.status_text = tk.StringVar(value = "Please insert track number to add tracks to your tracklist")
         self.tracklist_file = Path(__file__).with_name("saved_tracklist.csv")
+        self.custom_track_name = tk.StringVar()
+        self.custom_track_artist = tk.StringVar()
+        self.custom_track_path = tk.StringVar()
 
         controls = ttk.Frame(window, padding = 10)
         controls.pack(fill = "x")
@@ -53,10 +55,23 @@ class CreateTracklist:
 
         custom_track_label = ttk.Label(controls, text = "Custom Track")
         custom_track_label.grid(row = 3, column = 0, sticky = "w", padx = (0, 5), pady = 4)
-        custom_track_entry = ttk.Entry(controls, width = 24, textvariable = self.custom_track_input)
+        custom_artist_label = ttk.Label(controls, text = "Custom Artist")
+        custom_artist_label.grid(row = 4, column = 0, sticky = "w", padx = (0, 5), pady = 4)
+        custom_track_entry = ttk.Entry(controls, width = 24, textvariable = self.custom_track_name)
         custom_track_entry.grid(row = 3, column = 1, columnspan = 2, sticky = "w", padx = (0, 10), pady = 4)
+        custom_artist_entry = ttk.Entry(controls, width = 24, textvariable = self.custom_track_artist)
+        custom_artist_entry.grid(row = 4, column = 1, columnspan = 2, sticky = "w", padx = (0, 10), pady = 4)
+
+        custom_path_label = ttk.Label(controls, text = "Custom Path")
+        custom_path_label.grid(row = 5, column = 0, sticky = "w", padx = (0, 5), pady = 4)
+        custom_path_entry = ttk.Entry(controls, width = 24, textvariable = self.custom_track_path)
+        custom_path_entry.grid(row = 5, column = 1, columnspan = 2, sticky = "w", padx = (0, 10), pady = 4)
+
         custom_track_button = ttk.Button(controls, text = "Add Custom Track", command = self.add_custom_track)
         custom_track_button.grid(row = 3, column = 3, padx = 5, pady = 4)
+
+        stop_music_button = ttk.Button(controls, text = "Stop playing", command = self.library.stop_track)
+        stop_music_button.grid(row = 3, column = 4, padx = 5, pady = 4)
 
 
         self.tracklist_text = tk.Text(window, height = 18, width = 90)
@@ -72,7 +87,14 @@ class CreateTracklist:
         text_area.configure(state = "disabled")
 
     def _format_tracklist(self):
-        lines = [f"{index + 1}. {name} ({track_number})" for index, (track_number, name) in enumerate(self.tracklist)]
+        lines = []
+        for index, track_number in enumerate(self.tracklist):
+            name = self.library.get_name(track_number) or "Unknown"
+            artist = self.library.get_artist(track_number)
+            if artist:
+                lines.append(f"{index + 1}. {name} - {artist} ({track_number})")
+            else:
+                lines.append(f"{index + 1}. {name} ({track_number})")
         return "\n".join(lines)
 
     def _refresh_tracklist_text(self):
@@ -85,27 +107,45 @@ class CreateTracklist:
         if not name:
             self.status_text.set("Invalid track number, please enter a valid track number.")
             return
-        self.tracklist.append((track_number, name))
+        self.tracklist.append(track_number)
         self._refresh_tracklist_text()
         self.status_text.set(f"Added '{name}' to tracklist.")
 
     def add_custom_track(self):
-        custom_name = self.custom_track_input.get().strip()
+        custom_name = self.custom_track_name.get().strip()
+        custom_artist = self.custom_track_artist.get().strip()
+        custom_path = self.custom_track_path.get().strip()
+
         if not custom_name:
             self.status_text.set("Please enter a custom track name.")
             return
 
-        custom_track_id = f"CUST{len(self.tracklist) + 1:03d}"
-        self.tracklist.append((custom_track_id, custom_name))
+        if not custom_artist:
+            self.status_text.set("Please enter a custom artist.")
+            return
+
+        if not custom_path:
+            self.status_text.set("Please enter the audio file path.")
+            return
+
+        if not Path(custom_path).exists():
+            self.status_text.set("Audio file not found at that path.")
+            return
+
+        custom_track_id = self._next_custom_track_id()
+        self.library.add_custom_track(custom_track_id, custom_name, custom_artist, custom_path)
+        self.tracklist.append(custom_track_id)
         self._refresh_tracklist_text()
-        self.custom_track_input.set("")
+        self.custom_track_name.set("")
+        self.custom_track_artist.set("")
+        self.custom_track_path.set("")
         self.status_text.set(f"Added custom track '{custom_name}' to tracklist.")
 
     def play_tracklist(self):
         if not self.tracklist:
             self.status_text.set("List is empty. Please add some tracks in.")
             return
-        for track_number, _ in self.tracklist:
+        for track_number in self.tracklist:
             self.library.increment_play_count(track_number)
         self.status_text.set("Played all tracks in tracklist.")
 
@@ -123,8 +163,11 @@ class CreateTracklist:
             self.status_text.set("Track not found in the library.")
             return
 
-        self.library.increment_play_count(track_number)
-        self.status_text.set(f"Played '{name}'.")
+        if self.library.play_track(track_number):
+            self.library.increment_play_count(track_number)
+            self.status_text.set(f"Played '{name}'.")
+        else:
+            self.status_text.set("Error playing track.")
 
     def shuffle_tracklist(self):
         if len(self.tracklist) < 2:
@@ -137,11 +180,12 @@ class CreateTracklist:
     def remove_track(self):
         raw = self.track_input.get().strip()
         track_number = raw.zfill(2) if raw.isdigit() else raw
-        for index, (saved_track_number, name) in enumerate(self.tracklist):
+        for index, saved_track_number in enumerate(self.tracklist):
             if saved_track_number == track_number:
                 del self.tracklist[index]
                 self._refresh_tracklist_text()
-                self.status_text.set(f"Removed '{name}' from tracklist.")
+                removed_name = self.library.get_name(track_number) or "track"
+                self.status_text.set(f"Removed '{removed_name}' from tracklist.")
                 return
         self.status_text.set("Track not found in tracklist.")
 
@@ -154,16 +198,25 @@ class CreateTracklist:
         if position < 1 or position  > len(self.tracklist):
             self.status_text.set("Invalid track position.")
             return
-        track_number, name = self.tracklist[position - 1]
-        self.library.increment_play_count(track_number)
-        self.status_text.set(f"Played '{name}'.")
+        track_number = self.tracklist[position - 1]
+        name = self.library.get_name(track_number) or "Unknown"
+        if self.library.play_track(track_number):
+            self.library.increment_play_count(track_number)
+            self.status_text.set(f"Played '{name}'.")
+        else:
+            self.status_text.set("Error playing track.")
 
     def save_tracklist(self):
         try:
             with self.tracklist_file.open("w", newline="", encoding="utf-8") as file:
                 writer = csv.writer(file)
-                writer.writerow(["track_number", "name"])
-                writer.writerows(self.tracklist)
+                writer.writerow(["track_number", "name", "artist", "audio_path"])
+                for track_number in self.tracklist:
+                    item = self.library.library.get(track_number)
+                    if item is None:
+                        continue
+                    audio_path = str(item.audio_path) if item.audio_path else ""
+                    writer.writerow([track_number, item.name, item.artist, audio_path])
             self.status_text.set(f"Tracklist saved to {self.tracklist_file.name}.")
         except OSError:
             self.status_text.set("Could not save tracklist.")
@@ -179,13 +232,18 @@ class CreateTracklist:
             with self.tracklist_file.open("r", newline="", encoding="utf-8") as file:
                 reader = csv.DictReader(file)
                 for row in reader:
-                    track_number = row["track_number"].strip()
+                    track_number = row.get("track_number", "").strip()
+                    if not track_number:
+                        continue
+
                     normalised_number = track_number.zfill(2) if track_number.isdigit() else track_number
                     name = row.get("name", "").strip()
-                    if not name:
-                        name = self.library.get_name(normalised_number)
-                    if name:
-                        loaded_tracklist.append((normalised_number, name))
+                    artist = row.get("artist", "").strip()
+                    audio_path = row.get("audio_path", "").strip()
+
+                    if normalised_number not in self.library.library and name and artist:
+                        self.library.add_custom_track(normalised_number, name, artist, audio_path)
+                    loaded_tracklist.append(normalised_number)
 
             self.tracklist = loaded_tracklist
             self._refresh_tracklist_text()
@@ -194,6 +252,14 @@ class CreateTracklist:
         except (OSError, KeyError):
             if not auto_load:
                 self.status_text.set("Could not load saved tracklist.")
+
+    def _next_custom_track_id(self):
+        index = 1
+        while True:
+            track_id = f"CUST{index:03d}"
+            if track_id not in self.library.library:
+                return track_id
+            index += 1
 
 if __name__ == "__main__":
     root = tk.Tk()

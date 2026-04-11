@@ -6,11 +6,11 @@ import track_library_oop as lib
 
 
 class UpdateTracks:
-    def __init__(self, window):
+    def __init__(self, window, library=None):
         self.window = window
         self.window.title("Update Tracks")
         self.window.geometry("900x500")
-        self.library = lib.TrackLibrary()
+        self.library = library or lib.TrackLibrary()
         self.track_input = tk.StringVar()
         self.rating_input = tk.StringVar()
         self.status_text = tk.StringVar(value = "Please enter track number and rating to update (tracks are rated from 1 to 5)")

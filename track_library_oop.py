@@ -1,12 +1,26 @@
+from pathlib import Path
+
+try:
+    import pygame
+except ModuleNotFoundError:
+    pygame = None
+
+
 class LibraryItem:
-    def __init__(self, name: str, artist: str, rating: int, play_count: int = 0):
+    def __init__(self, name: str, artist: str, rating: int, play_count: int = 0, audio_path=None):
         self.name = name
         self.artist = artist
         self.rating = rating
         self.play_count = play_count
+        self.audio_path = audio_path
 
     def __repr__(self) -> str:
-        return f"LibraryItem(name={self.name}, artist={self.artist}, rating={self.rating}, play_count={self.play_count})"
+        return (
+            "LibraryItem("
+            f"name={self.name}, artist={self.artist}, rating={self.rating}, "
+            f"play_count={self.play_count}, audio_path={self.audio_path}"
+            ")"
+        )
 
     def stars(self) -> str:
         return "*" * self.rating
@@ -14,13 +28,44 @@ class LibraryItem:
 
 class TrackLibrary:
     def __init__(self):
+        self.music_dir = Path(__file__).resolve().parent / "Music links"
         self.library = {
-            "01": LibraryItem("Another Brick in the Wall", "Pink Floyd", 4),
-            "02": LibraryItem("Stayin' Alive", "Bee Gees", 5),
-            "03": LibraryItem("Highway To Hell", "AC/DC", 2),
-            "04": LibraryItem("Shape Of You", "Ed Sheeran", 1),
-            "05": LibraryItem("Someone Like You", "Adele", 3)
+            "01": LibraryItem(
+                "Another Brick in the Wall",
+                "Pink Floyd",
+                4,
+                audio_path=self.music_dir / "pink floyd - another brick in the wall - Piccologollum (youtube).mp3",
+            ),
+            "02": LibraryItem(
+                "Stayin' Alive",
+                "Bee Gees",
+                5,
+                audio_path=self.music_dir / "Bee Gees - Stayin' Alive (Official Music Video) - BeeGeesVEVO (youtube).mp3",
+            ),
+            "03": LibraryItem(
+                "Highway To Hell",
+                "AC/DC",
+                2,
+                audio_path=self.music_dir / "AC_DC - Highway to Hell (Official Video) - acdcVEVO (youtube).mp3",
+            ),
+            "04": LibraryItem(
+                "Shape Of You",
+                "Ed Sheeran",
+                1,
+                audio_path=self.music_dir / "Ed Sheeran - Shape Of You [Official Lyric Video] - Ed Sheeran (youtube).mp3",
+            ),
+            "05": LibraryItem(
+                "Someone Like You",
+                "Adele",
+                3,
+                audio_path=self.music_dir / "Adele - Someone Like You (Official Music Video) - Adele (youtube).mp3",
+            ),
         }
+
+    def _normalise_track_number(self, track_number: str) -> str:
+        if track_number.isdigit():
+            return track_number.zfill(2)
+        return track_number
 
     def get_name(self, track_number: str):
         item = self.library.get(track_number)
@@ -38,6 +83,23 @@ class TrackLibrary:
         item = self.library.get(track_number)
         return item.play_count if item else -1
 
+    def get_audio_path(self, track_number: str):
+        item = self.library.get(track_number)
+        if not item or not item.audio_path:
+            return None
+        return item.audio_path
+
+    def add_custom_track(self, track_number: str, name: str, artist: str, audio_path: str = "", rating: int = 0, play_count: int = 0):
+        track_number = self._normalise_track_number(track_number)
+        self.library[track_number] = LibraryItem(
+            name,
+            artist,
+            rating,
+            play_count=play_count,
+            audio_path=Path(audio_path) if audio_path else None,
+        )
+        return track_number
+
     def set_rating(self, track_number: str, rating: int):
         item = self.library.get(track_number)
         if not item:
@@ -51,12 +113,6 @@ class TrackLibrary:
             return False
         item.play_count += 1
         return True
-
-    def _normalise_track_number(self, track_number: str) -> str:
-        if track_number.isdigit():
-            return track_number.zfill(2)
-        else:
-            return track_number
 
     def _format_track(self, track_number: str, item: LibraryItem) -> str:
         return f"{track_number}: {item.name} - {item.artist} {item.stars()}"
@@ -88,3 +144,25 @@ class TrackLibrary:
             if item.artist.lower() == artist:
                 matching_artist.append(self._format_track(track_number, item))
         return "\n".join(matching_artist)
+
+    def _init_audio(self):
+        if pygame is None:
+            return False
+        if pygame.mixer.get_init() is None:
+            pygame.mixer.init()
+        return True
+
+    def play_track(self, track_number):
+        audio_path = self.get_audio_path(track_number)
+        if audio_path is None or not audio_path.exists():
+            return False
+        if not self._init_audio():
+            return False
+        pygame.mixer.music.stop()
+        pygame.mixer.music.load(str(audio_path))
+        pygame.mixer.music.play()
+        return True
+
+    def stop_track(self):
+        if pygame is not None and pygame.mixer.get_init():
+            pygame.mixer.music.stop()
