@@ -1,6 +1,6 @@
 <mxfile host="65bd71144e">
     <diagram id="nRz1YOlllqEtQiq8gOWT" name="Page-1">
-        <mxGraphModel dx="342" dy="675" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
+        <mxGraphModel dx="526" dy="629" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="850" pageHeight="1100" math="0" shadow="0">
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>
@@ -8,7 +8,7 @@
         </mxGraphModel>
     </diagram>
     <diagram id="class_diagram" name="Class Diagram">
-        <mxGraphModel dx="342" dy="675" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
+        <mxGraphModel dx="622" dy="744" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1169" pageHeight="827" math="0" shadow="0">
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>
@@ -24,11 +24,11 @@
                 <mxCell id="c_updatetracks" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;b&gt;UpdateTracks&lt;/b&gt;&lt;/p&gt;&lt;hr size=&quot;1&quot; /&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ window : Toplevel&lt;/p&gt;&lt;hr size=&quot;1&quot; /&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ __init__(window)&lt;br&gt;+ update_track()&lt;/p&gt;" style="verticalAlign=top;align=left;overflow=fill;fontSize=12;fontFamily=Helvetica;html=1;whiteSpace=wrap;" parent="1" vertex="1">
                     <mxGeometry x="700" y="240" width="180" height="100" as="geometry"/>
                 </mxCell>
-                <mxCell id="c_library_sys" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;i&gt;&amp;lt;&amp;lt;module&amp;gt;&amp;gt;&lt;/i&gt;&lt;br&gt;&lt;b&gt;track_library_oop&lt;/b&gt;&lt;/p&gt;&lt;hr size=&quot;1&quot; /&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ library : dict[str, LibraryItem]&lt;/p&gt;&lt;hr size=&quot;1&quot; /&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ get_name()&lt;br&gt;+ get_artist()&lt;br&gt;+ get_rating()&lt;br&gt;+ get_play_count()&lt;br&gt;+ set_rating()&lt;br&gt;+ increment_play_count()&lt;br&gt;+ list_all()&lt;br&gt;+ list_artists()&lt;br&gt;+ search_tracks()&lt;br&gt;+ filter_by_artist()&lt;/p&gt;" style="verticalAlign=top;align=left;overflow=fill;fontSize=12;fontFamily=Helvetica;html=1;whiteSpace=wrap;" parent="1" vertex="1">
-                    <mxGeometry x="400" y="460" width="180" height="230" as="geometry"/>
+                <mxCell id="c_library_sys" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;i&gt;&amp;lt;&amp;lt;module&amp;gt;&amp;gt;&lt;/i&gt;&lt;br&gt;&lt;b&gt;track_library_oop&lt;/b&gt;&lt;/p&gt;&lt;hr size=&quot;1&quot; /&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ library : dict[str, LibraryItem]&lt;/p&gt;&lt;hr size=&quot;1&quot; /&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ get_name()&lt;br&gt;+ get_artist()&lt;br&gt;+ get_rating()&lt;br&gt;+ get_play_count()&lt;br&gt;+ get_audio_path()&lt;br&gt;+ set_rating()&lt;br&gt;+ increment_play_count()&lt;br&gt;+ list_all()&lt;br&gt;+ list_artists()&lt;br&gt;+ search_tracks()&lt;br&gt;+ filter_by_artist()&lt;br&gt;+ add_custom_track()&lt;br&gt;+ _init_audio()&lt;br&gt;+ play_track()&lt;br&gt;+ stop_track()&lt;/p&gt;" style="verticalAlign=top;align=left;overflow=fill;fontSize=12;fontFamily=Helvetica;html=1;whiteSpace=wrap;" parent="1" vertex="1">
+                    <mxGeometry x="400" y="620" width="180" height="300" as="geometry"/>
                 </mxCell>
-                <mxCell id="c_libraryitem" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;b&gt;LibraryItem&lt;/b&gt;&lt;/p&gt;&lt;hr size=&quot;1&quot; /&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ name : str&lt;br&gt;+ artist : str&lt;br&gt;+ rating : int&lt;br&gt;+ play_count : int&lt;/p&gt;&lt;hr size=&quot;1&quot; /&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ __init__()&lt;br&gt;+ stars() : str&lt;/p&gt;" style="verticalAlign=top;align=left;overflow=fill;fontSize=12;fontFamily=Helvetica;html=1;whiteSpace=wrap;" parent="1" vertex="1">
-                    <mxGeometry x="700" y="485" width="180" height="140" as="geometry"/>
+                <mxCell id="c_libraryitem" value="&lt;p style=&quot;margin:0px;margin-top:4px;text-align:center;&quot;&gt;&lt;b&gt;LibraryItem&lt;/b&gt;&lt;/p&gt;&lt;hr size=&quot;1&quot; /&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ name : str&lt;br&gt;+ artist : str&lt;br&gt;+ rating : int&lt;br&gt;+ play_count : int&lt;br&gt;+ audio_path : str&lt;/p&gt;&lt;hr size=&quot;1&quot; /&gt;&lt;p style=&quot;margin:0px;margin-left:4px;&quot;&gt;+ __init__()&lt;br&gt;+ stars() : str&lt;/p&gt;" style="verticalAlign=top;align=left;overflow=fill;fontSize=12;fontFamily=Helvetica;html=1;whiteSpace=wrap;" parent="1" vertex="1">
+                    <mxGeometry x="700" y="485" width="180" height="160" as="geometry"/>
                 </mxCell>
                 <mxCell id="e_tp_tv" value="creates" style="endArrow=open;endFill=0;endSize=8;html=1;edgeStyle=orthogonalEdgeStyle;entryX=0.5;entryY=0;exitX=0;exitY=0.5;" parent="1" source="c_trackplayer" target="c_trackviewer" edge="1">
                     <mxGeometry relative="1" as="geometry"/>

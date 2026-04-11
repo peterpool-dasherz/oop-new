@@ -1,259 +1,271 @@
-<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/26.4 Safari/605.1.15">
-  <diagram id="usecase_oop" name="Use Case Diagram (OOP)">
-    <mxGraphModel dx="2142" dy="1478" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1300" pageHeight="1400" math="0" shadow="0">
-      <root>
-        <mxCell id="0" />
-        <mxCell id="1" parent="0" />
-        <mxCell id="actor_user" parent="1" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" value="User" vertex="1">
-          <mxGeometry height="80" width="40" x="20" y="550" as="geometry" />
-        </mxCell>
-        <mxCell id="system_boundary" parent="1" style="swimlane;whiteSpace=wrap;html=1;startSize=30;fontSize=14;fontStyle=1;" value="JukeBox System" vertex="1">
-          <mxGeometry height="1450" width="950" x="160" y="20" as="geometry" />
-        </mxCell>
-        <mxCell id="subsystem_player" parent="system_boundary" style="swimlane;whiteSpace=wrap;html=1;startSize=25;fillColor=#f8cecc;strokeColor=#b85450;" value="&lt;b&gt;TrackPlayer (Main UI)&lt;/b&gt;" vertex="1">
-          <mxGeometry height="220" width="240" x="40" y="40" as="geometry" />
-        </mxCell>
-        <mxCell id="uc_open_viewer" parent="subsystem_player" style="ellipse;whiteSpace=wrap;html=1;" value="Open View Tracks" vertex="1">
-          <mxGeometry height="50" width="140" x="50" y="40" as="geometry" />
-        </mxCell>
-        <mxCell id="uc_open_update" parent="subsystem_player" style="ellipse;whiteSpace=wrap;html=1;" value="Open Update Tracks" vertex="1">
-          <mxGeometry height="50" width="140" x="50" y="100" as="geometry" />
-        </mxCell>
-        <mxCell id="uc_open_tracklist" parent="subsystem_player" style="ellipse;whiteSpace=wrap;html=1;" value="Open Create Tracklist" vertex="1">
-          <mxGeometry height="50" width="140" x="50" y="160" as="geometry" />
-        </mxCell>
-        <mxCell id="subsystem_viewer" parent="system_boundary" style="swimlane;whiteSpace=wrap;html=1;startSize=25;fillColor=#dae8fc;strokeColor=#6c8ebf;" value="&lt;b&gt;TrackViewer&lt;/b&gt;" vertex="1">
-          <mxGeometry height="280" width="240" x="40" y="300" as="geometry" />
-        </mxCell>
-        <mxCell id="uc_list_tracks" parent="subsystem_viewer" style="ellipse;whiteSpace=wrap;html=1;" value="List All Tracks" vertex="1">
-          <mxGeometry height="50" width="140" x="50" y="40" as="geometry" />
-        </mxCell>
-        <mxCell id="uc_view_track" parent="subsystem_viewer" style="ellipse;whiteSpace=wrap;html=1;" value="View Specific Track" vertex="1">
-          <mxGeometry height="50" width="140" x="50" y="100" as="geometry" />
-        </mxCell>
-        <mxCell id="uc_search" parent="subsystem_viewer" style="ellipse;whiteSpace=wrap;html=1;" value="Search Tracks" vertex="1">
-          <mxGeometry height="50" width="140" x="50" y="160" as="geometry" />
-        </mxCell>
-        <mxCell id="uc_filter" parent="subsystem_viewer" style="ellipse;whiteSpace=wrap;html=1;" value="Filter by Artist" vertex="1">
-          <mxGeometry height="50" width="140" x="50" y="220" as="geometry" />
-        </mxCell>
-        <mxCell id="subsystem_update" parent="system_boundary" style="swimlane;whiteSpace=wrap;html=1;startSize=25;fillColor=#fff2cc;strokeColor=#d6b656;" value="&lt;b&gt;UpdateTracks&lt;/b&gt;" vertex="1">
-          <mxGeometry height="150" width="240" x="40" y="620" as="geometry" />
-        </mxCell>
-        <mxCell id="uc_update_rating" parent="subsystem_update" style="ellipse;whiteSpace=wrap;html=1;" value="Update Track Rating" vertex="1">
-          <mxGeometry height="50" width="140" x="50" y="60" as="geometry" />
-        </mxCell>
-        <mxCell id="subsystem_tracklist" parent="system_boundary" style="swimlane;whiteSpace=wrap;html=1;startSize=25;fillColor=#d5e8d4;strokeColor=#82b366;" value="&lt;b&gt;CreateTracklist&lt;/b&gt;" vertex="1">
-          <mxGeometry height="640" width="240" x="40" y="800" as="geometry" />
-        </mxCell>
-        <mxCell id="uc_add_track" parent="subsystem_tracklist" style="ellipse;whiteSpace=wrap;html=1;" value="Add Track to Tracklist" vertex="1">
-          <mxGeometry height="50" width="140" x="50" y="30" as="geometry" />
-        </mxCell>
-        <mxCell id="uc_remove_track" parent="subsystem_tracklist" style="ellipse;whiteSpace=wrap;html=1;" value="Remove Track" vertex="1">
-          <mxGeometry height="50" width="140" x="50" y="90" as="geometry" />
-        </mxCell>
-        <mxCell id="uc_play_track" parent="subsystem_tracklist" style="ellipse;whiteSpace=wrap;html=1;" value="Play by Track Number" vertex="1">
-          <mxGeometry height="50" width="140" x="50" y="150" as="geometry" />
-        </mxCell>
-        <mxCell id="uc_play_position" parent="subsystem_tracklist" style="ellipse;whiteSpace=wrap;html=1;" value="Play by Track Position" vertex="1">
-          <mxGeometry height="50" width="140" x="50" y="210" as="geometry" />
-        </mxCell>
-        <mxCell id="uc_play_tracklist" parent="subsystem_tracklist" style="ellipse;whiteSpace=wrap;html=1;" value="Play Tracklist" vertex="1">
-          <mxGeometry height="50" width="140" x="50" y="270" as="geometry" />
-        </mxCell>
-        <mxCell id="uc_shuffle" parent="subsystem_tracklist" style="ellipse;whiteSpace=wrap;html=1;" value="Shuffle Play" vertex="1">
-          <mxGeometry height="50" width="140" x="50" y="330" as="geometry" />
-        </mxCell>
-        <mxCell id="uc_reset" parent="subsystem_tracklist" style="ellipse;whiteSpace=wrap;html=1;" value="Reset Tracklist" vertex="1">
-          <mxGeometry height="50" width="140" x="50" y="380" as="geometry" />
-        </mxCell>
-        <mxCell id="uc_save_tracklist" parent="subsystem_tracklist" style="ellipse;whiteSpace=wrap;html=1;" value="Save Tracklist" vertex="1">
-          <mxGeometry height="50" width="140" x="50" y="440" as="geometry" />
-        </mxCell>
-        <mxCell id="uc_load_tracklist" parent="subsystem_tracklist" style="ellipse;whiteSpace=wrap;html=1;" value="Load Tracklist" vertex="1">
-          <mxGeometry height="50" width="140" x="50" y="500" as="geometry" />
-        </mxCell>
-        <mxCell id="uc_add_custom_track" parent="subsystem_tracklist" style="ellipse;whiteSpace=wrap;html=1;" value="Add Custom Track" vertex="1">
-          <mxGeometry height="50" width="140" x="50" y="560" as="geometry" />
-        </mxCell>
-        <mxCell id="subsystem_library" parent="system_boundary" style="swimlane;whiteSpace=wrap;html=1;startSize=25;fillColor=#e1d5e7;strokeColor=#9673a6;" value="&lt;b&gt;TrackLibrary (Backend)&lt;/b&gt;" vertex="1">
-          <mxGeometry height="250" width="260" x="590" y="470" as="geometry" />
-        </mxCell>
-        <mxCell id="uc_get_track_info" parent="subsystem_library" style="ellipse;whiteSpace=wrap;html=1;" value="Get Track Info" vertex="1">
-          <mxGeometry height="50" width="140" x="60" y="50" as="geometry" />
-        </mxCell>
-        <mxCell id="uc_manage_ratings" parent="subsystem_library" style="ellipse;whiteSpace=wrap;html=1;" value="Manage Ratings" vertex="1">
-          <mxGeometry height="50" width="140" x="60" y="120" as="geometry" />
-        </mxCell>
-        <mxCell id="uc_track_play_count" parent="subsystem_library" style="ellipse;whiteSpace=wrap;html=1;" value="Track Play Count" vertex="1">
-          <mxGeometry height="50" width="140" x="60" y="190" as="geometry" />
-        </mxCell>
-        <mxCell id="inc6" edge="1" parent="system_boundary" source="uc_open_update" style="html=1;endArrow=open;endFill=0;dashed=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;">
-          <mxGeometry relative="1" as="geometry">
-            <Array as="points">
-              <mxPoint x="342.38" y="336.03" />
-              <mxPoint x="382.38" y="556.03" />
-            </Array>
-            <mxPoint x="159.9967656444161" y="184.00212778603705" as="sourcePoint" />
-            <mxPoint x="169.07619687221984" y="679.7406033413074" as="targetPoint" />
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="inc6_lbl" connectable="0" parent="inc6" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="&amp;lt;&amp;lt;include&amp;gt;&amp;gt;" vertex="1">
-          <mxGeometry relative="1" x="-0.15" as="geometry">
-            <mxPoint as="offset" />
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="ext3" edge="1" parent="system_boundary" style="html=1;endArrow=classic;endFill=1;dashed=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" target="uc_play_tracklist">
-          <mxGeometry relative="1" as="geometry">
-            <Array as="points">
-              <mxPoint x="376.4" y="1110" />
-            </Array>
-            <mxPoint x="229.9993405352726" y="1153.9201978394183" as="sourcePoint" />
-            <mxPoint x="246.39999999999998" y="1110" as="targetPoint" />
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="ext3_lbl" connectable="0" parent="ext3" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;" vertex="1">
-          <mxGeometry relative="1" x="-0.15" as="geometry">
-            <mxPoint x="-32" y="13" as="offset" />
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="GbwGMdoOPIpMONGsU_Ja-2" edge="1" parent="system_boundary" source="uc_play_track" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;dashed=1;endArrow=open;endFill=0;" target="uc_track_play_count" value="&amp;lt;&amp;lt;include&amp;gt;&amp;gt;">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="GbwGMdoOPIpMONGsU_Ja-3" edge="1" parent="system_boundary" source="uc_play_position" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;curved=0;dashed=1;endArrow=open;endFill=0;" target="uc_track_play_count">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="GbwGMdoOPIpMONGsU_Ja-4" connectable="0" parent="GbwGMdoOPIpMONGsU_Ja-3" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="&amp;lt;&amp;lt;include&amp;gt;&amp;gt;" vertex="1">
-          <mxGeometry relative="1" x="0.2922" y="1" as="geometry">
-            <mxPoint as="offset" />
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="e_u1" edge="1" parent="1" source="actor_user" style="html=1;endArrow=none;endFill=0;" target="uc_open_viewer">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="e_u2" edge="1" parent="1" source="actor_user" style="html=1;endArrow=none;endFill=0;" target="uc_open_tracklist">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="e_u3" edge="1" parent="1" source="actor_user" style="html=1;endArrow=none;endFill=0;" target="uc_open_update">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="e_tv1" edge="1" parent="1" source="actor_user" style="html=1;endArrow=none;endFill=0;" target="uc_list_tracks">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="e_tv2" edge="1" parent="1" source="actor_user" style="html=1;endArrow=none;endFill=0;" target="uc_view_track">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="e_tv3" edge="1" parent="1" source="actor_user" style="html=1;endArrow=none;endFill=0;" target="uc_search">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="e_tv4" edge="1" parent="1" source="actor_user" style="html=1;endArrow=none;endFill=0;" target="uc_filter">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="e_ut1" edge="1" parent="1" source="actor_user" style="html=1;endArrow=none;endFill=0;" target="uc_update_rating">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="e_ct1" edge="1" parent="1" source="actor_user" style="html=1;endArrow=none;endFill=0;" target="uc_add_track">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="e_ct2" edge="1" parent="1" source="actor_user" style="html=1;endArrow=none;endFill=0;" target="uc_remove_track">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="e_ct3" edge="1" parent="1" source="actor_user" style="html=1;endArrow=none;endFill=0;" target="uc_play_track">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="e_ct4" edge="1" parent="1" source="actor_user" style="html=1;endArrow=none;endFill=0;" target="uc_play_position">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="e_ct5" edge="1" parent="1" source="actor_user" style="html=1;endArrow=none;endFill=0;" target="uc_play_tracklist">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="e_ct6" edge="1" parent="1" source="actor_user" style="html=1;endArrow=none;endFill=0;" target="uc_shuffle">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="e_ct7" edge="1" parent="1" source="actor_user" style="html=1;endArrow=none;endFill=0;" target="uc_reset">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="e_ct8" edge="1" parent="1" source="actor_user" style="html=1;endArrow=none;endFill=0;" target="uc_save_tracklist">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="e_ct9" edge="1" parent="1" source="actor_user" style="html=1;endArrow=none;endFill=0;" target="uc_load_tracklist">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="e_ct10" edge="1" parent="1" source="actor_user" style="html=1;endArrow=none;endFill=0;" target="uc_add_custom_track">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="inc1" edge="1" parent="1" source="uc_view_track" style="html=1;endArrow=open;endFill=0;dashed=1;" target="uc_get_track_info">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="inc1_lbl" connectable="0" parent="inc1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="&amp;lt;&amp;lt;include&amp;gt;&amp;gt;" vertex="1">
-          <mxGeometry relative="1" x="-0.15" as="geometry">
-            <mxPoint as="offset" />
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="inc2" edge="1" parent="1" source="uc_update_rating" style="html=1;endArrow=open;endFill=0;dashed=1;" target="uc_manage_ratings">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="inc2_lbl" connectable="0" parent="inc2" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="&amp;lt;&amp;lt;include&amp;gt;&amp;gt;" vertex="1">
-          <mxGeometry relative="1" x="-0.15" as="geometry">
-            <mxPoint as="offset" />
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="inc3" edge="1" parent="1" source="uc_play_tracklist" style="html=1;endArrow=open;endFill=0;dashed=1;" target="uc_track_play_count">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="inc3_lbl" connectable="0" parent="inc3" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="&amp;lt;&amp;lt;include&amp;gt;&amp;gt;" vertex="1">
-          <mxGeometry relative="1" x="-0.15" as="geometry">
-            <mxPoint as="offset" />
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="inc4" edge="1" parent="1" source="uc_open_viewer" style="html=1;endArrow=open;endFill=0;dashed=1;" target="uc_list_tracks">
-          <mxGeometry relative="1" as="geometry">
-            <Array as="points">
-              <mxPoint x="180" y="210" />
-              <mxPoint x="170" y="270" />
-            </Array>
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="inc4_lbl" connectable="0" parent="inc4" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="&amp;lt;&amp;lt;include&amp;gt;&amp;gt;" vertex="1">
-          <mxGeometry relative="1" x="-0.15" as="geometry">
-            <mxPoint x="13" y="16" as="offset" />
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="inc5" edge="1" parent="1" source="uc_open_tracklist" style="html=1;endArrow=open;endFill=0;dashed=1;" target="uc_add_track">
-          <mxGeometry relative="1" as="geometry">
-            <Array as="points">
-              <mxPoint x="490" y="380" />
-              <mxPoint x="470" y="780" />
-            </Array>
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="inc5_lbl" connectable="0" parent="inc5" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="&amp;lt;&amp;lt;include&amp;gt;&amp;gt;" vertex="1">
-          <mxGeometry relative="1" x="-0.15" as="geometry">
-            <mxPoint x="-4" y="156" as="offset" />
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="ext1" edge="1" parent="1" source="uc_search" style="html=1;endArrow=classic;endFill=1;dashed=1;" target="uc_list_tracks">
-          <mxGeometry relative="1" as="geometry" />
-        </mxCell>
-        <mxCell id="ext1_lbl" connectable="0" parent="ext1" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;" vertex="1">
-          <mxGeometry relative="1" x="-0.15" as="geometry">
-            <mxPoint y="20" as="offset" />
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="ext2" edge="1" parent="1" source="uc_filter" style="html=1;endArrow=classic;endFill=1;dashed=1;" target="uc_list_tracks">
-          <mxGeometry relative="1" as="geometry">
-            <Array as="points">
-              <mxPoint x="420" y="510" />
-              <mxPoint x="430" y="440" />
-            </Array>
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="ext2_lbl" connectable="0" parent="ext2" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;" vertex="1">
-          <mxGeometry relative="1" x="-0.15" as="geometry">
-            <mxPoint as="offset" />
-          </mxGeometry>
-        </mxCell>
-      </root>
-    </mxGraphModel>
-  </diagram>
+<mxfile host="65bd71144e">
+    <diagram id="usecase_oop" name="Use Case Diagram (OOP)">
+        <mxGraphModel dx="489" dy="584" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1300" pageHeight="1400" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="actor_user" value="User" style="shape=umlActor;verticalLabelPosition=bottom;verticalAlign=top;html=1;outlineConnect=0;" parent="1" vertex="1">
+                    <mxGeometry x="20" y="550" width="40" height="80" as="geometry"/>
+                </mxCell>
+                <mxCell id="system_boundary" value="JukeBox System" style="swimlane;whiteSpace=wrap;html=1;startSize=30;fontSize=14;fontStyle=1;" parent="1" vertex="1">
+                    <mxGeometry x="160" y="20" width="950" height="1540" as="geometry"/>
+                </mxCell>
+                <mxCell id="subsystem_player" value="&lt;b&gt;TrackPlayer (Main UI)&lt;/b&gt;" style="swimlane;whiteSpace=wrap;html=1;startSize=25;fillColor=#f8cecc;strokeColor=#b85450;" parent="system_boundary" vertex="1">
+                    <mxGeometry x="40" y="40" width="240" height="220" as="geometry"/>
+                </mxCell>
+                <mxCell id="uc_open_viewer" value="Open View Tracks" style="ellipse;whiteSpace=wrap;html=1;" parent="subsystem_player" vertex="1">
+                    <mxGeometry x="50" y="40" width="140" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="uc_open_update" value="Open Update Tracks" style="ellipse;whiteSpace=wrap;html=1;" parent="subsystem_player" vertex="1">
+                    <mxGeometry x="50" y="100" width="140" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="uc_open_tracklist" value="Open Create Tracklist" style="ellipse;whiteSpace=wrap;html=1;" parent="subsystem_player" vertex="1">
+                    <mxGeometry x="50" y="160" width="140" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="subsystem_viewer" value="&lt;b&gt;TrackViewer&lt;/b&gt;" style="swimlane;whiteSpace=wrap;html=1;startSize=25;fillColor=#dae8fc;strokeColor=#6c8ebf;" parent="system_boundary" vertex="1">
+                    <mxGeometry x="40" y="300" width="240" height="280" as="geometry"/>
+                </mxCell>
+                <mxCell id="uc_list_tracks" value="List All Tracks" style="ellipse;whiteSpace=wrap;html=1;" parent="subsystem_viewer" vertex="1">
+                    <mxGeometry x="50" y="40" width="140" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="uc_view_track" value="View Specific Track" style="ellipse;whiteSpace=wrap;html=1;" parent="subsystem_viewer" vertex="1">
+                    <mxGeometry x="50" y="100" width="140" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="uc_search" value="Search Tracks" style="ellipse;whiteSpace=wrap;html=1;" parent="subsystem_viewer" vertex="1">
+                    <mxGeometry x="50" y="160" width="140" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="uc_filter" value="Filter by Artist" style="ellipse;whiteSpace=wrap;html=1;" parent="subsystem_viewer" vertex="1">
+                    <mxGeometry x="50" y="220" width="140" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="subsystem_update" value="&lt;b&gt;UpdateTracks&lt;/b&gt;" style="swimlane;whiteSpace=wrap;html=1;startSize=25;fillColor=#fff2cc;strokeColor=#d6b656;" parent="system_boundary" vertex="1">
+                    <mxGeometry x="40" y="620" width="240" height="150" as="geometry"/>
+                </mxCell>
+                <mxCell id="uc_update_rating" value="Update Track Rating" style="ellipse;whiteSpace=wrap;html=1;" parent="subsystem_update" vertex="1">
+                    <mxGeometry x="50" y="60" width="140" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="subsystem_tracklist" value="&lt;b&gt;CreateTracklist&lt;/b&gt;" style="swimlane;whiteSpace=wrap;html=1;startSize=25;fillColor=#d5e8d4;strokeColor=#82b366;" parent="system_boundary" vertex="1">
+                    <mxGeometry x="40" y="800" width="240" height="700" as="geometry"/>
+                </mxCell>
+                <mxCell id="uc_add_track" value="Add Track to Tracklist" style="ellipse;whiteSpace=wrap;html=1;" parent="subsystem_tracklist" vertex="1">
+                    <mxGeometry x="50" y="30" width="140" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="uc_remove_track" value="Remove Track" style="ellipse;whiteSpace=wrap;html=1;" parent="subsystem_tracklist" vertex="1">
+                    <mxGeometry x="50" y="90" width="140" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="uc_play_track" value="Play by Track Number" style="ellipse;whiteSpace=wrap;html=1;" parent="subsystem_tracklist" vertex="1">
+                    <mxGeometry x="50" y="150" width="140" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="uc_play_position" value="Play by Track Position" style="ellipse;whiteSpace=wrap;html=1;" parent="subsystem_tracklist" vertex="1">
+                    <mxGeometry x="50" y="210" width="140" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="uc_play_tracklist" value="Play Tracklist" style="ellipse;whiteSpace=wrap;html=1;" parent="subsystem_tracklist" vertex="1">
+                    <mxGeometry x="50" y="270" width="140" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="uc_shuffle" value="Shuffle Play" style="ellipse;whiteSpace=wrap;html=1;" parent="subsystem_tracklist" vertex="1">
+                    <mxGeometry x="50" y="330" width="140" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="uc_reset" value="Reset Tracklist" style="ellipse;whiteSpace=wrap;html=1;" parent="subsystem_tracklist" vertex="1">
+                    <mxGeometry x="50" y="380" width="140" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="uc_save_tracklist" value="Save Tracklist" style="ellipse;whiteSpace=wrap;html=1;" parent="subsystem_tracklist" vertex="1">
+                    <mxGeometry x="50" y="440" width="140" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="uc_load_tracklist" value="Load Tracklist" style="ellipse;whiteSpace=wrap;html=1;" parent="subsystem_tracklist" vertex="1">
+                    <mxGeometry x="50" y="500" width="140" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="uc_add_custom_track" value="Add Custom Track" style="ellipse;whiteSpace=wrap;html=1;" parent="subsystem_tracklist" vertex="1">
+                    <mxGeometry x="50" y="560" width="140" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="uc_stop_playing" value="Stop playing" style="ellipse;whiteSpace=wrap;html=1;" parent="subsystem_tracklist" vertex="1">
+                    <mxGeometry x="50" y="620" width="140" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="subsystem_library" value="&lt;b&gt;TrackLibrary (Backend)&lt;/b&gt;" style="swimlane;whiteSpace=wrap;html=1;startSize=25;fillColor=#e1d5e7;strokeColor=#9673a6;" parent="system_boundary" vertex="1">
+                    <mxGeometry x="590" y="470" width="260" height="400" as="geometry"/>
+                </mxCell>
+                <mxCell id="uc_get_track_info" value="Get Track Info" style="ellipse;whiteSpace=wrap;html=1;" parent="subsystem_library" vertex="1">
+                    <mxGeometry x="60" y="50" width="140" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="uc_manage_ratings" value="Manage Ratings" style="ellipse;whiteSpace=wrap;html=1;" parent="subsystem_library" vertex="1">
+                    <mxGeometry x="60" y="120" width="140" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="uc_track_play_count" value="Track Play Count" style="ellipse;whiteSpace=wrap;html=1;" parent="subsystem_library" vertex="1">
+                    <mxGeometry x="60" y="190" width="140" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="uc_backend_play" value="Play Audio File" style="ellipse;whiteSpace=wrap;html=1;" parent="subsystem_library" vertex="1">
+                    <mxGeometry x="60" y="260" width="140" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="uc_backend_stop" value="Stop Audio File" style="ellipse;whiteSpace=wrap;html=1;" parent="subsystem_library" vertex="1">
+                    <mxGeometry x="60" y="330" width="140" height="50" as="geometry"/>
+                </mxCell>
+                <mxCell id="inc6" style="html=1;endArrow=open;endFill=0;dashed=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;" parent="system_boundary" source="uc_open_update" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="342.38" y="336.03"/>
+                            <mxPoint x="382.38" y="556.03"/>
+                        </Array>
+                        <mxPoint x="159.9967656444161" y="184.00212778603705" as="sourcePoint"/>
+                        <mxPoint x="169.07619687221984" y="679.7406033413074" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="inc6_lbl" value="&amp;lt;&amp;lt;include&amp;gt;&amp;gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="inc6" connectable="0" vertex="1">
+                    <mxGeometry x="-0.15" relative="1" as="geometry">
+                        <mxPoint as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="ext3" style="html=1;endArrow=classic;endFill=1;dashed=1;entryX=1;entryY=0.5;entryDx=0;entryDy=0;" parent="system_boundary" target="uc_play_tracklist" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="376.4" y="1110"/>
+                        </Array>
+                        <mxPoint x="229.9993405352726" y="1153.9201978394183" as="sourcePoint"/>
+                        <mxPoint x="246.39999999999998" y="1110" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="ext3_lbl" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="ext3" connectable="0" vertex="1">
+                    <mxGeometry x="-0.15" relative="1" as="geometry">
+                        <mxPoint x="-32" y="13" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="GbwGMdoOPIpMONGsU_Ja-2" value="&amp;lt;&amp;lt;include&amp;gt;&amp;gt;" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0.5;entryY=1;entryDx=0;entryDy=0;dashed=1;endArrow=open;endFill=0;" parent="system_boundary" source="uc_play_track" target="uc_track_play_count" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="GbwGMdoOPIpMONGsU_Ja-3" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;exitX=1;exitY=0;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;curved=0;dashed=1;endArrow=open;endFill=0;" parent="system_boundary" source="uc_play_position" target="uc_track_play_count" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="GbwGMdoOPIpMONGsU_Ja-4" value="&amp;lt;&amp;lt;include&amp;gt;&amp;gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="GbwGMdoOPIpMONGsU_Ja-3" connectable="0" vertex="1">
+                    <mxGeometry x="0.2922" y="1" relative="1" as="geometry">
+                        <mxPoint as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="e_u1" style="html=1;endArrow=none;endFill=0;" parent="1" source="actor_user" target="uc_open_viewer" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e_u2" style="html=1;endArrow=none;endFill=0;" parent="1" source="actor_user" target="uc_open_tracklist" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e_u3" style="html=1;endArrow=none;endFill=0;" parent="1" source="actor_user" target="uc_open_update" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e_tv1" style="html=1;endArrow=none;endFill=0;" parent="1" source="actor_user" target="uc_list_tracks" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e_tv2" style="html=1;endArrow=none;endFill=0;" parent="1" source="actor_user" target="uc_view_track" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e_tv3" style="html=1;endArrow=none;endFill=0;" parent="1" source="actor_user" target="uc_search" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e_tv4" style="html=1;endArrow=none;endFill=0;" parent="1" source="actor_user" target="uc_filter" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e_ut1" style="html=1;endArrow=none;endFill=0;" parent="1" source="actor_user" target="uc_update_rating" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e_ct1" style="html=1;endArrow=none;endFill=0;" parent="1" source="actor_user" target="uc_add_track" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e_ct2" style="html=1;endArrow=none;endFill=0;" parent="1" source="actor_user" target="uc_remove_track" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e_ct3" style="html=1;endArrow=none;endFill=0;" parent="1" source="actor_user" target="uc_play_track" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e_ct4" style="html=1;endArrow=none;endFill=0;" parent="1" source="actor_user" target="uc_play_position" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e_ct5" style="html=1;endArrow=none;endFill=0;" parent="1" source="actor_user" target="uc_play_tracklist" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e_ct6" style="html=1;endArrow=none;endFill=0;" parent="1" source="actor_user" target="uc_shuffle" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e_ct7" style="html=1;endArrow=none;endFill=0;" parent="1" source="actor_user" target="uc_reset" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e_ct8" style="html=1;endArrow=none;endFill=0;" parent="1" source="actor_user" target="uc_save_tracklist" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e_ct9" style="html=1;endArrow=none;endFill=0;" parent="1" source="actor_user" target="uc_load_tracklist" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e_ct10" style="html=1;endArrow=none;endFill=0;" parent="1" source="actor_user" target="uc_add_custom_track" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="e_ct11" style="html=1;endArrow=none;endFill=0;" parent="1" source="actor_user" target="uc_stop_playing" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="inc1" style="html=1;endArrow=open;endFill=0;dashed=1;" parent="1" source="uc_view_track" target="uc_get_track_info" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="inc1_lbl" value="&amp;lt;&amp;lt;include&amp;gt;&amp;gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="inc1" connectable="0" vertex="1">
+                    <mxGeometry x="-0.15" relative="1" as="geometry">
+                        <mxPoint as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="inc2" style="html=1;endArrow=open;endFill=0;dashed=1;" parent="1" source="uc_update_rating" target="uc_manage_ratings" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="inc2_lbl" value="&amp;lt;&amp;lt;include&amp;gt;&amp;gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="inc2" connectable="0" vertex="1">
+                    <mxGeometry x="-0.15" relative="1" as="geometry">
+                        <mxPoint as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="inc3" style="html=1;endArrow=open;endFill=0;dashed=1;" parent="1" source="uc_play_tracklist" target="uc_track_play_count" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="inc3_lbl" value="&amp;lt;&amp;lt;include&amp;gt;&amp;gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="inc3" connectable="0" vertex="1">
+                    <mxGeometry x="-0.15" relative="1" as="geometry">
+                        <mxPoint as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="inc4" style="html=1;endArrow=open;endFill=0;dashed=1;" parent="1" source="uc_open_viewer" target="uc_list_tracks" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="180" y="210"/>
+                            <mxPoint x="170" y="270"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="inc4_lbl" value="&amp;lt;&amp;lt;include&amp;gt;&amp;gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="inc4" connectable="0" vertex="1">
+                    <mxGeometry x="-0.15" relative="1" as="geometry">
+                        <mxPoint x="13" y="16" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="inc5" style="html=1;endArrow=open;endFill=0;dashed=1;" parent="1" source="uc_open_tracklist" target="uc_add_track" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="490" y="380"/>
+                            <mxPoint x="470" y="780"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="inc5_lbl" value="&amp;lt;&amp;lt;include&amp;gt;&amp;gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="inc5" connectable="0" vertex="1">
+                    <mxGeometry x="-0.15" relative="1" as="geometry">
+                        <mxPoint x="-4" y="156" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="ext1" style="html=1;endArrow=classic;endFill=1;dashed=1;" parent="1" source="uc_search" target="uc_list_tracks" edge="1">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="ext1_lbl" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="ext1" connectable="0" vertex="1">
+                    <mxGeometry x="-0.15" relative="1" as="geometry">
+                        <mxPoint y="20" as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="ext2" style="html=1;endArrow=classic;endFill=1;dashed=1;" parent="1" source="uc_filter" target="uc_list_tracks" edge="1">
+                    <mxGeometry relative="1" as="geometry">
+                        <Array as="points">
+                            <mxPoint x="420" y="510"/>
+                            <mxPoint x="430" y="440"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="ext2_lbl" value="&amp;lt;&amp;lt;extend&amp;gt;&amp;gt;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" parent="ext2" connectable="0" vertex="1">
+                    <mxGeometry x="-0.15" relative="1" as="geometry">
+                        <mxPoint as="offset"/>
+                    </mxGeometry>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
 </mxfile>
