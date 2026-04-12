@@ -8,7 +8,7 @@ import track_library_oop as lib
 class UpdateTracks:
     def __init__(self, window, library=None):
         self.window = window
-        self.window.title("Update Tracks")
+        self.window.title("Update Track Rating")
         self.window.geometry("900x500")
         self.library = library or lib.TrackLibrary()
         self.track_input = tk.StringVar()
@@ -22,7 +22,7 @@ class UpdateTracks:
         track_number_entry = ttk.Entry(form, width = 10, textvariable = self.track_input).grid(row = 0, column = 1, padx = (5, 20))
         rating_label = ttk.Label(form, text = "New Rating").grid(row = 0, column = 2, sticky = "w")
         rating_entry = ttk.Entry(form, width = 10, textvariable = self.rating_input).grid(row = 0, column = 3, padx = 5)
-        track_number_button = ttk.Button(form, text = "Update Track", command = self.update_track).grid(row = 0, column = 4, padx = (15, 0))
+        track_number_button = ttk.Button(form, text = "Update Track Rating", command = self.update_track).grid(row = 0, column = 4, padx = (15, 0))
 
         self.output = tk.Text(window, width = 70, height = 10)
         self.output.pack(fill = "both", expand = True, padx = 12, pady = (8, 6))

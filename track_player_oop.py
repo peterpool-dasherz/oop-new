@@ -24,7 +24,7 @@ class TrackPlayer:
 
         view_tracks_button = ttk.Button(button_row, text = "View Tracks", command = self.open_view_tracks_oop).pack(side = "left", padx = 10)
         create_tracklist_button = ttk.Button(button_row, text = "Create Tracklist", command = self.open_create_tracklist).pack(side = "left", padx = 10)
-        update_tracks_button = ttk.Button(button_row, text = "Update Tracks", command = self.open_update_tracks).pack(side = "left", padx = 10)
+        update_tracks_button = ttk.Button(button_row, text = "Update Track Rating", command = self.open_update_tracks).pack(side = "left", padx = 10)
         
     def open_view_tracks_oop(self):
         TrackViewer(tk.Toplevel(self.window), self.library)
