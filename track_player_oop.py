@@ -16,6 +16,9 @@ class TrackPlayer:
 
         self.library = lib.TrackLibrary()
         self.library.load_custom_tracks_from_csv(Path(__file__).with_name("saved_tracklist.csv"))
+        self.library.load_lib_state(Path(__file__).with_name("saved_library.csv"))
+        self.state_file = Path(__file__).with_name("saved_library.csv")
+        self.window.protocol("WM_DELETE_WINDOW", self.on_close)
 
         container = ttk.Frame(window, padding = 16)
         container.pack(fill = "both", expand = True)
@@ -39,9 +42,14 @@ class TrackPlayer:
         CreateTracklist(tk.Toplevel(self.window), self.library)
     def open_update_tracks(self):
         UpdateTracks(tk.Toplevel(self.window), self.library)
+    def on_close(self):
+        self.library.save_lib_state(self.state_file)
+        self.window.destroy()
 
 if __name__ == "__main__":
     root = tk.Tk()
     font.configure()
-    TrackPlayer(root)
+    font.apply_dark_theme(root)
+    app = TrackPlayer(root)
+    root.protocol( "WM_DELETE_WINDOW", app.on_close)
     root.mainloop()

@@ -73,7 +73,7 @@ class CreateTracklist:
         ttk.Button(library_frame, text = "Save", command = self.save_tracklist).grid(row = 0, column = 2, padx = 4)
         ttk.Button(library_frame, text = "Load", command = self.load_tracklist).grid(row = 0, column = 3, padx = 4)
 
-        self.tracklist_text = tk.Text(window, height = 22, width = 102)
+        self.tracklist_text = tk.Text(window, height = 22, width = 102, bg = "#31384a", fg = "#e7eaf0", insertbackground = "#e7eaf0", selectbackground = "#5f8fbe")
         self.tracklist_text.pack(fill = "both", expand = True, padx = 10, pady = (0, 5))
         self.set_text(self.tracklist_text, "")
         ttk.Label(window, textvariable = self.status_text, padding = (10, 8)).pack(fill = "x")

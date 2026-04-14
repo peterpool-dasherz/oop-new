@@ -201,3 +201,57 @@ class TrackLibrary:
     def stop_track(self):
         if pygame is not None and pygame.mixer.get_init():
             pygame.mixer.music.stop()
+
+    def save_lib_state(self, csv_path):
+        path = Path(csv_path)
+        with path.open("w", newline = "", encoding = "utf-8") as file:
+            writer = csv.writer(file)
+            writer.writerow(["track_number", "name", "artist", "rating", "play_count", "audio_path"])
+
+            for track_number, item in self.library.items():
+                audio_path = str(item.audio_path) 
+                if item.audio_path is None:
+                    audio_path = ""
+                else:
+                    audio_path = str(item.audio_path)
+                writer.writerow([track_number, item.name, item.artist, item.rating, item.play_count, audio_path])
+
+    def load_lib_state(self, csv_path):
+        path = Path(csv_path)
+        if not path.exists():
+            return 0
+        loaded_count = 0
+        with path.open("r", newline = "", encoding = "utf-8") as file:
+            reader = csv.DictReader(file)
+            for row in reader:
+                track_number = row.get("track_number", "").strip()
+                if not track_number:
+                    continue
+                name = row.get("name", "").strip()
+                artist = row.get("artist", "").strip()
+                rating_text = row.get("rating", "").strip()
+                play_count_text = row.get("play_count", "").strip()
+                audio_path = row.get("audio_path", "").strip()
+
+                if rating_text.isdigit():
+                    rating = int(rating_text)
+                else:
+                    rating = 0
+                if play_count_text.isdigit():
+                    play_count = int(play_count_text)
+                else:
+                    play_count = 0
+                
+                if track_number in self.library:
+                    item = self.library[track_number]
+                    if name is not None:
+                        item.name = name
+                    if artist is not None:
+                        item.artist = artist
+                    item.rating = rating
+                    item.play_count = play_count
+                    item.audio_path = Path(audio_path) if audio_path else item.audio_path
+                elif name is not None and artist is not None:
+                    self.add_custom_track(track_number, name, artist, audio_path, rating, play_count)
+                loaded_count += 1
+        return loaded_count

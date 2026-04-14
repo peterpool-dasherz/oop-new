@@ -24,7 +24,7 @@ class UpdateTracks:
         ttk.Entry(form, width = 10, textvariable = self.rating_input).grid(row = 0, column = 3, padx = (6, 18))
         ttk.Button(form, text = "Update Track Rating", command = self.update_track).grid(row = 0, column = 4)
 
-        self.output = tk.Text(window, width = 64, height = 12)
+        self.output = tk.Text(window, width = 64, height = 12, bg = "#31384a", fg = "#e7eaf0", insertbackground = "#e7eaf0", selectbackground = "#5f8fbe")
         self.output.pack(fill = "both", expand = True, padx = 12, pady = (0, 6))
         self.set_text(self.output, "")
         status_label = ttk.Label(window, textvariable = self.status_text, padding = (12, 6)).pack(fill = "x")
@@ -38,19 +38,18 @@ class UpdateTracks:
     def update_track(self):
         raw_track = self.track_input.get().strip()
         raw_rating = self.rating_input.get().strip()
-
-        if not raw_track.isdigit():
-            self.status_text.set("Track number invalid, please enter a valid track number.")
-            return
-        
         if not raw_rating.isdigit() or not (1 <= int(raw_rating) <= 5):
-            self.status_text.set("Rating must be between 1 and 5.")
+            self.status_text.set("Invalid rating. Please enter a number from 1 to 5.")
             return
-
-        track_number = raw_track.zfill(2)
+        track_number = raw_track.strip()
+        if track_number.isdigit():
+            track_number = track_number.zfill(2)
+        else:
+            track_number = track_number.upper()
+        
         name = self.library.get_name(track_number)
-        if not name:
-            self.status_text.set("No track with that number is found.")
+        if name is None:
+            self.status_text.set("No track found with the given track number.")
             return
         
         self.library.set_rating(track_number, int(raw_rating))
@@ -59,13 +58,10 @@ class UpdateTracks:
 
         self.set_text(
             self.output,
-            f"Track updated successfully\n\n"
-            f"Track: {name}\n"
-            f"Artist: {artist}\n"
-            f"Plays: {plays}\n"
-            f"Rating: {raw_rating}"
+            f"Updated rating for track {track_number}:\n\nName: {name}\nArtist: {artist}\nRating: {raw_rating}\nPlay Count: {plays}"
         )
-        self.status_text.set("Track rating updated successfully")
+        self.status_text.set(f"Successfully updated rating for track {track_number} to {raw_rating}.")
+            
 
 if __name__ == "__main__":
     root = tk.Tk()

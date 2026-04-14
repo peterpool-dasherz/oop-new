@@ -51,12 +51,14 @@ class TrackViewer:
 
         list_panel = ttk.LabelFrame(content, text = "Track List", padding = 8)
         list_panel.pack(side = "left", fill = "both", expand = True)
-        self.list_text = tk.Text(list_panel, height = 22, width = 76)
+        self.list_text = tk.Text(list_panel, height = 22, width = 76, bg = "#31384a", fg = "#e7eaf0", insertbackground = "#e7eaf0", selectbackground = "#5f8fbe")
+            
         self.list_text.pack(fill = "both", expand = True)
 
         detail_panel = ttk.LabelFrame(content, text = "Track Details", padding = 8)
         detail_panel.pack(side = "left", fill = "y", padx = (12, 0))
-        self.detail_text = tk.Text(detail_panel, height = 22, width = 28)
+        self.detail_text = tk.Text(detail_panel, height = 22, width = 28, bg = "#31384a", fg = "#e7eaf0", insertbackground = "#e7eaf0", selectbackground = "#5f8fbe")
+            
         self.detail_text.pack(fill = "both", expand = True)
 
         status_bar = ttk.Label(self.window, textvariable = self.status_text, padding = (10, 8))
@@ -81,21 +83,25 @@ class TrackViewer:
     
     def view_tracks(self):
         raw_track = self.track_input.get().strip()
-        track_number = raw_track.zfill(2)
-
-        name = self.library.get_name(track_number)
-        if not name:
-            self.set_text(self.detail_text, f"Track {track_number} not found")
-            self.status_text.set("Failed to view track because track number is invalid, please input a valid track number")
+        if not raw_track:
+            self.status_text.set("Please enter a valid track number to view.")
             return
         
+        track_number = raw_track
+        if track_number.isdigit():
+            track_number = track_number.zfill(2)
+        else:
+            track_number = track_number.upper()
+        name = self.library.get_name(track_number)
+        if name is None:
+            self.status_text.set("No track found with the given track number.")
+            return
         artist = self.library.get_artist(track_number)
         rating = self.library.get_rating(track_number)
-        plays = self.library.get_play_count(track_number)
-        track_details = f"{name}\n{artist}\n{rating}\n{plays}"
-        self.set_text(self.detail_text, track_details)
-        self.status_text.set("Track details displayed successfully (View Track button was clicked)")
+        play_count = self.library.get_play_count(track_number)
 
+        self.set_text(self.detail_text, f"Track Number: {track_number}\nName: {name}\nArtist: {artist}\nRating: {rating}\nPlay Count: {play_count}")
+        self.status_text.set("Track details displayed for track number " + track_number)
     def search_tracks(self):
         query = self.search_input.get().strip()
         selected_artist = self.artists_filter_input.get().strip()
