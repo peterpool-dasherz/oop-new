@@ -5,6 +5,8 @@ from pathlib import Path
 import random
 import font_manager as font
 import track_library_oop as lib
+import time
+import pygame 
 
 
 class CreateTracklist:
@@ -21,6 +23,12 @@ class CreateTracklist:
         self.custom_track_name = tk.StringVar()
         self.custom_track_artist = tk.StringVar()
         self.custom_track_path = tk.StringVar()
+        self.current_index = 0
+        self.is_playing = False
+        self.is_paused = False
+        self.after_id = None
+        self.playback_id = 0
+        
 
         controls = ttk.Frame(window, padding = 10)
         controls.pack(fill = "x")
@@ -73,6 +81,11 @@ class CreateTracklist:
         stop_music_button = ttk.Button(controls, text = "Stop playing", command = self.library.stop_track)
         stop_music_button.grid(row = 3, column = 4, padx = 5, pady = 4)
 
+        pause_button = ttk.Button(controls, text="Pause", command=self.pause_playback)
+        pause_button.grid(row=3, column=5, padx=5)
+
+        stop_button = ttk.Button(controls, text="Stop", command=self.stop_playback)
+        stop_button.grid(row=3, column=6, padx=5)
 
         self.tracklist_text = tk.Text(window, height = 18, width = 90)
         self.tracklist_text.pack(fill = "both", expand = True, padx = 10, pady = (0, 5))
@@ -145,10 +158,98 @@ class CreateTracklist:
         if not self.tracklist:
             self.status_text.set("List is empty. Please add some tracks in.")
             return
-        for track_number in self.tracklist:
-            self.library.increment_play_count(track_number)
-        self.status_text.set("Played all tracks in tracklist.")
+        
+        self.playback_id += 1
+        current_id = self.playback_id
+        
+        if self.is_paused:
+            pygame.mixer.music.unpause()
+            self.is_paused = False
+            self.is_playing = True
+            self.status_text.set("Resumed playback.")
+            self.window.after(1000, lambda: self._check_playback(current_id))
+            return
+        self.current_index = 0
+        self.is_playing = True
+        self.is_paused = False
+        self.play_next_track(current_id)
+        
 
+    def play_next_track(self, playback_id):
+        if not self.is_playing or playback_id != self.playback_id:
+            return
+        if self.current_index >= len(self.tracklist):
+            self.status_text.set("Played all tracks in tracklist.")
+            self.is_playing = False
+            return
+        track_number = self.tracklist[self.current_index]
+        if self.library.play_track(track_number):
+            self.library.increment_play_count(track_number)
+            name = self.library.get_name(track_number) or "Unknown"
+            self.status_text.set(f"Now playing: '{name}'.")
+
+            
+            
+        else:
+            self.status_text.set("Error playing track, skipping to next.")
+        self.current_index += 1
+        self.after_id = self.window.after(1000, lambda: self._check_playback(playback_id))
+    
+    def pause_playback(self):
+        if not self.is_playing:
+            return
+        pygame.mixer.music.pause()
+        self.is_paused = True
+        self.is_playing = False
+        self.status_text.set("Playback paused.")
+    
+    def stop_playback(self):
+        self.is_paused = False
+        self.is_playing = False
+        if self.after_id:
+            self.window.after_cancel(self.after_id)
+            self.after_id = None
+        pygame.mixer.music.stop()
+        self.status_text.set("Playback stopped.")
+
+
+    def resume_playback(self):
+    
+
+        if not self.is_paused:
+            return
+
+        pygame.mixer.music.unpause()
+        self.is_paused = False
+        self.is_playing = True
+        self.status_text.set("Playback resumed.")
+
+        if not self.checking:
+            self.checking = True
+            self.window.after(1000, self._check_track_end)
+
+    def stop_playback(self):
+        
+
+        self.is_playing = False
+        self.is_paused = False
+        self.checking = False
+        self.current_index = 0
+        self.playback_id += 1
+
+        pygame.mixer.music.stop()
+        self.status_text.set("Playback stopped.")
+
+    def _check_playback(self):
+        if not self.is_playing:
+            return
+        if self.is_paused:
+            self.window.after(1000, lambda: self._check_playback(self.playback_id))
+            return 
+        if pygame.mixer.music.get_busy():
+            self.after_id = self.window.after(1000, lambda: self._check_playback(self.playback_id))
+        else:
+                self.play_next_track(self.playback_id)
     def reset_tracklist(self):
         self.tracklist.clear()
         self._refresh_tracklist_text()

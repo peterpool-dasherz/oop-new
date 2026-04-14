@@ -88,17 +88,15 @@ class TrackViewer:
 
     def search_tracks(self):
         query = self.search_input.get().strip()
-        result = self.library.search_tracks(query)
-
-        if not query:
-            self.status_text.set("Enter artist name to search")
+        selected_artist = self.artists_filter_input.get().strip()
+        if not query and selected_artist == "All artists":
+            self.status_text.set("Enter search query or select artist.")
             return
-        
+        result = self.library.search_and_filter(query, selected_artist)
         if not result:
             self.set_text(self.list_text, "No tracks matched")
-            self.status_text.set("0 tracks matched with request")
+            self.status_text.set("Search returned 0 matches")
             return
-        
         self.set_text(self.list_text, result)
         count = len(result.splitlines())
         self.status_text.set(f"{count} tracks matched with request (Search button was clicked)")

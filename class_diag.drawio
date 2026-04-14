@@ -1,6 +1,6 @@
 <mxfile host="65bd71144e">
     <diagram id="class_diagram" name="Class Diagram">
-        <mxGraphModel dx="468" dy="404" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="900" math="0" shadow="0">
+        <mxGraphModel dx="766" dy="404" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1400" pageHeight="900" math="0" shadow="0">
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>
@@ -46,7 +46,7 @@
                 <mxCell id="e_ct_lib" value="uses" style="endArrow=open;endFill=0;endSize=12;html=1;edgeStyle=orthogonalEdgeStyle;exitX=0.5;exitY=1;entryX=0.5;entryY=0;" parent="1" source="c_createtracklist" target="c_tracklibrary" edge="1">
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
-                <mxCell id="e_lib_item" value="contains 1..*" style="endArrow=open;endFill=0;endSize=12;html=1;edgeStyle=orthogonalEdgeStyle;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" parent="1" source="c_tracklibrary" target="c_libraryitem" edge="1">
+                <mxCell id="e_lib_item" value="contains" style="endArrow=open;endFill=0;endSize=12;html=1;edgeStyle=orthogonalEdgeStyle;exitX=1;exitY=0.5;entryX=0;entryY=0.5;" parent="1" source="c_tracklibrary" target="c_libraryitem" edge="1">
                     <mxGeometry relative="1" as="geometry"/>
                 </mxCell>
             </root>
