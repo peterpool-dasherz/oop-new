@@ -1,4 +1,5 @@
 from pathlib import Path
+import csv
 
 try:
     import pygame
@@ -145,7 +146,39 @@ class TrackLibrary:
                 matching_artist.append(self._format_track(track_number, item))
         return "\n".join(matching_artist)
     
+    def load_custom_tracks_from_csv(self, csv_path: str):
+        path = Path(csv_path)
+        if not path.exists():
+            return 0
+        loaded_count = 0
+        with path.open("r", newline = "", encoding = "utf-8") as file:
+            reader = csv.DictReader(file)
+            for row in reader:
+                track_number = row.get("track_number", "").strip()
+                if not track_number.upper().startswith("CUST"):
+                    continue
+                name = row.get("name", "").strip()
+                artist = row.get("artist", "").strip()
+                audio_path = row.get("audio_path", "").strip()
 
+                if not track_number or not name or not artist:
+                    continue
+                self.add_custom_track(track_number, name, artist, audio_path)
+                loaded_count += 1
+        return loaded_count
+    
+    def search_and_filter(self, query: str, artist: str) -> str:
+        query = query.strip().lower()
+        artist = artist.strip().lower()
+        results = []
+
+        for track_number, item in self.library.items():
+            if artist != "all artists" and item.artist.lower() != artist:
+                continue
+            if query and (query not in item.name.lower()) and (query not in item.artist.lower()):
+                continue
+            results.append(self._format_track(track_number, item))
+        return "\n".join(results)
 
     def _init_audio(self):
         if pygame is None:

@@ -5,6 +5,7 @@ import font_manager as font
 from create_tracklist import CreateTracklist
 from update_tracks import UpdateTracks
 from view_tracks_oop import TrackViewer
+from pathlib import Path
 
 class TrackPlayer:
     def __init__(self, window):
@@ -14,6 +15,7 @@ class TrackPlayer:
         self.window.configure(bg = "gray")
 
         self.library = lib.TrackLibrary()
+        self.library.load_custom_tracks_from_csv(Path(__file__).with_name("saved_tracklist.csv"))
 
         container = ttk.Frame(window, padding = 16)
         container.pack(fill = "both", expand = True)

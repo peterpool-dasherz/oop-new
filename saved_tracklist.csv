@@ -1,6 +1,7 @@
-track_number,name
-01,Another Brick in the Wall
-05,Someone Like You
-03,Highway To Hell
-02,Stayin' Alive
-04,Shape Of You
+track_number,name,artist,audio_path
+01,Another Brick in the Wall,Pink Floyd,/Users/hoangpham/Downloads/JukeBox/Music links/pink floyd - another brick in the wall - Piccologollum (youtube).mp3
+05,Someone Like You,Adele,/Users/hoangpham/Downloads/JukeBox/Music links/Adele - Someone Like You (Official Music Video) - Adele (youtube).mp3
+03,Highway To Hell,AC/DC,/Users/hoangpham/Downloads/JukeBox/Music links/AC_DC - Highway to Hell (Official Video) - acdcVEVO (youtube).mp3
+02,Stayin' Alive,Bee Gees,/Users/hoangpham/Downloads/JukeBox/Music links/Bee Gees - Stayin' Alive (Official Music Video) - BeeGeesVEVO (youtube).mp3
+04,Shape Of You,Ed Sheeran,/Users/hoangpham/Downloads/JukeBox/Music links/Ed Sheeran - Shape Of You [Official Lyric Video] - Ed Sheeran (youtube).mp3
+CUST001,Promise,Laufey,/Users/hoangpham/Downloads/JukeBox/Music links/Laufey - Promise (Official Audio) - Laufey (youtube).mp3
