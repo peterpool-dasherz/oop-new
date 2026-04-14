@@ -10,21 +10,26 @@ class TrackPlayer:
     def __init__(self, window):
         self.window = window
         self.window.title("JukeBox")
-        self.window.geometry("520x150")
+        self.window.geometry("780x220")
         self.window.configure(bg = "gray")
 
         self.library = lib.TrackLibrary()
 
-        container = ttk.Frame(window, padding = 10)
+        container = ttk.Frame(window, padding = 16)
         container.pack(fill = "both", expand = True)
 
-        track_player_label = ttk.Label(container, text = "Select an option by clicking one of the buttons below").pack(fill = "x", pady = (0, 20))
+        track_player_label = ttk.Label(container, text = "Select an option from the buttons below")
+        track_player_label.pack(fill = "x", pady = (0, 16))
+
         button_row = ttk.Frame(container)
         button_row.pack()
 
-        view_tracks_button = ttk.Button(button_row, text = "Manage Tracks", command = self.open_view_tracks_oop).pack(side = "left", padx = 10)
-        create_tracklist_button = ttk.Button(button_row, text = "Manage Tracklist", command = self.open_create_tracklist).pack(side = "left", padx = 10)
-        update_tracks_button = ttk.Button(button_row, text = "Update Track Rating", command = self.open_update_tracks).pack(side = "left", padx = 10)
+        view_tracks_button = ttk.Button(button_row, text = "Manage Tracks", command = self.open_view_tracks_oop)
+        view_tracks_button.pack(side = "left", padx = 12)
+        create_tracklist_button = ttk.Button(button_row, text = "Manage Tracklist", command = self.open_create_tracklist)
+        create_tracklist_button.pack(side = "left", padx = 12)
+        update_tracks_button = ttk.Button(button_row, text = "Update Track Rating", command = self.open_update_tracks)
+        update_tracks_button.pack(side = "left", padx = 12)
         
     def open_view_tracks_oop(self):
         TrackViewer(tk.Toplevel(self.window), self.library)

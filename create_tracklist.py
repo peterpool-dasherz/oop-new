@@ -5,7 +5,6 @@ from pathlib import Path
 import random
 import font_manager as font
 import track_library_oop as lib
-import time
 import pygame 
 
 
@@ -13,7 +12,7 @@ class CreateTracklist:
     def __init__(self, window, library=None):
         self.window = window
         self.window.title("Create Tracklist")
-        self.window.geometry("1100x560")
+        self.window.geometry("1300x720")
         self.library = library or lib.TrackLibrary()
         self.track_input = tk.StringVar()
         self.tracklist_position = tk.StringVar()
@@ -28,66 +27,53 @@ class CreateTracklist:
         self.is_paused = False
         self.after_id = None
         self.playback_id = 0
+        self.checking = False
         
 
         controls = ttk.Frame(window, padding = 10)
         controls.pack(fill = "x")
-        track_number_label = ttk.Label(controls, text = "Track Number")
-        track_number_label.grid(row = 0, column = 0, sticky = "w", padx = (0, 5), pady = 4)
-        track_number_entry = ttk.Entry(controls, width = 8, textvariable = self.track_input)
-        track_number_entry.grid(row = 0, column = 1, padx = (0, 10), pady = 4)
-        add_track_button = ttk.Button(controls, text = "Add Track", command = self.add_track)
-        add_track_button.grid(row = 0, column = 2, padx = 5, pady = 4)
-        play_track_button = ttk.Button(controls, text = "Play by Track Number", command = self.play_track)
-        play_track_button.grid(row = 0, column = 3, padx = 5, pady = 4)
-        remove_track_button = ttk.Button(controls, text = "Remove Track", command = self.remove_track)
-        remove_track_button.grid(row = 0, column = 4, padx = 5, pady = 4)
 
-        tracklist_position_label = ttk.Label(controls, text = "Track Position")
-        tracklist_position_label.grid(row = 1, column = 0, sticky = "w", padx = (0, 5), pady = 4)
-        tracklist_position_entry = ttk.Entry(controls, width = 8, textvariable = self.tracklist_position)
-        tracklist_position_entry.grid(row = 1, column = 1, padx = (0, 10), pady = 4)
-        tracklist_position_button = ttk.Button(controls, text = "Play by Track Position", command = self.play_specific_track)
-        tracklist_position_button.grid(row = 1, column = 2, padx = 5, pady = 4)
-        play_tracklist_button = ttk.Button(controls, text = "Play Tracklist", command = self.play_tracklist)
-        play_tracklist_button.grid(row = 1, column = 3, padx = 5, pady = 4)
-        shuffle_tracklist_button = ttk.Button(controls, text = "Shuffle Play", command = self.shuffle_tracklist)
-        shuffle_tracklist_button.grid(row = 1, column = 4, padx = 5, pady = 4)
-        reset_tracklist_button = ttk.Button(controls, text = "Reset Tracklist", command = self.reset_tracklist)
-        reset_tracklist_button.grid(row = 1, column = 5, padx = 5, pady = 4)
+        track_frame = ttk.LabelFrame(controls, text = "Track Actions", padding = 8)
+        track_frame.grid(row = 0, column = 0, sticky = "ew", padx = 4, pady = 4)
+        ttk.Label(track_frame, text = "Track Number").grid(row = 0, column = 0, sticky = "w", padx = (0, 6))
+        ttk.Entry(track_frame, width = 8, textvariable = self.track_input).grid(row = 0, column = 1, padx = (0, 10))
+        ttk.Button(track_frame, text = "Add Track", command = self.add_track).grid(row = 0, column = 2, padx = 4)
+        ttk.Button(track_frame, text = "Play", command = self.play_track).grid(row = 0, column = 3, padx = 4)
+        ttk.Button(track_frame, text = "Remove", command = self.remove_track).grid(row = 0, column = 4, padx = 4)
 
-        save_tracklist_button = ttk.Button(controls, text = "Save Tracklist", command = self.save_tracklist)
-        save_tracklist_button.grid(row = 2, column = 2, padx = 5, pady = 4)
-        load_tracklist_button = ttk.Button(controls, text = "Load Tracklist", command = self.load_tracklist)
-        load_tracklist_button.grid(row = 2, column = 3, padx = 5, pady = 4)
+        position_frame = ttk.LabelFrame(controls, text = "Track Position", padding = 8)
+        position_frame.grid(row = 0, column = 1, sticky = "ew", padx = 4, pady = 4)
+        ttk.Label(position_frame, text = "Position").grid(row = 0, column = 0, sticky = "w", padx = (0, 6))
+        ttk.Entry(position_frame, width = 8, textvariable = self.tracklist_position).grid(row = 0, column = 1, padx = (0, 10))
+        ttk.Button(position_frame, text = "Play Position", command = self.play_specific_track).grid(row = 0, column = 2, padx = 4)
 
-        custom_track_label = ttk.Label(controls, text = "Custom Track")
-        custom_track_label.grid(row = 3, column = 0, sticky = "w", padx = (0, 5), pady = 4)
-        custom_artist_label = ttk.Label(controls, text = "Custom Artist")
-        custom_artist_label.grid(row = 4, column = 0, sticky = "w", padx = (0, 5), pady = 4)
-        custom_track_entry = ttk.Entry(controls, width = 24, textvariable = self.custom_track_name)
-        custom_track_entry.grid(row = 3, column = 1, columnspan = 2, sticky = "w", padx = (0, 10), pady = 4)
-        custom_artist_entry = ttk.Entry(controls, width = 24, textvariable = self.custom_track_artist)
-        custom_artist_entry.grid(row = 4, column = 1, columnspan = 2, sticky = "w", padx = (0, 10), pady = 4)
+        playback_frame = ttk.LabelFrame(controls, text = "Playback", padding = 8)
+        playback_frame.grid(row = 1, column = 0, columnspan = 2, sticky = "ew", padx = 4, pady = 4)
+        ttk.Button(playback_frame, text = "Play Tracklist", command = self.play_tracklist).grid(row = 0, column = 0, padx = 4)
+        ttk.Button(playback_frame, text = "Pause", command = self.pause_playback).grid(row = 0, column = 1, padx = 4)
+        ttk.Button(playback_frame, text = "Resume", command = self.resume_playback).grid(row = 0, column = 2, padx = 4)
+        ttk.Button(playback_frame, text = "Stop", command = self.stop_playback).grid(row = 0, column = 3, padx = 4)
+        ttk.Button(playback_frame, text = "Skip", command = self.skip_track).grid(row = 0, column = 4, padx = 4)
+        ttk.Button(playback_frame, text = "Reverse", command = self.reverse_track).grid(row = 0, column = 5, padx = 4)
 
-        custom_path_label = ttk.Label(controls, text = "Custom Path")
-        custom_path_label.grid(row = 5, column = 0, sticky = "w", padx = (0, 5), pady = 4)
-        custom_path_entry = ttk.Entry(controls, width = 24, textvariable = self.custom_track_path)
-        custom_path_entry.grid(row = 5, column = 1, columnspan = 2, sticky = "w", padx = (0, 10), pady = 4)
+        custom_frame = ttk.LabelFrame(controls, text = "Custom Track", padding = 8)
+        custom_frame.grid(row = 2, column = 0, columnspan = 2, sticky = "ew", padx = 4, pady = 4)
+        ttk.Label(custom_frame, text = "Name").grid(row = 0, column = 0, sticky = "w", padx = (0, 6))
+        ttk.Entry(custom_frame, width = 20, textvariable = self.custom_track_name).grid(row = 0, column = 1, padx = (0, 10))
+        ttk.Label(custom_frame, text = "Artist").grid(row = 0, column = 2, sticky = "w", padx = (0, 6))
+        ttk.Entry(custom_frame, width = 20, textvariable = self.custom_track_artist).grid(row = 0, column = 3, padx = (0, 10))
+        ttk.Label(custom_frame, text = "Path").grid(row = 1, column = 0, sticky = "w", padx = (0, 6), pady = (8, 0))
+        ttk.Entry(custom_frame, width = 48, textvariable = self.custom_track_path).grid(row = 1, column = 1, columnspan = 3, sticky = "ew", padx = (0, 10), pady = (8, 0))
+        ttk.Button(custom_frame, text = "Add Custom Track", command = self.add_custom_track).grid(row = 1, column = 4, padx = 4, pady = (8, 0))
 
-        custom_track_button = ttk.Button(controls, text = "Add Custom Track", command = self.add_custom_track)
-        custom_track_button.grid(row = 3, column = 3, padx = 5, pady = 4)
+        library_frame = ttk.LabelFrame(controls, text = "Tracklist Management", padding = 8)
+        library_frame.grid(row = 3, column = 0, columnspan = 2, sticky = "ew", padx = 4, pady = 4)
+        ttk.Button(library_frame, text = "Shuffle", command = self.shuffle_tracklist).grid(row = 0, column = 0, padx = 4)
+        ttk.Button(library_frame, text = "Reset", command = self.reset_tracklist).grid(row = 0, column = 1, padx = 4)
+        ttk.Button(library_frame, text = "Save", command = self.save_tracklist).grid(row = 0, column = 2, padx = 4)
+        ttk.Button(library_frame, text = "Load", command = self.load_tracklist).grid(row = 0, column = 3, padx = 4)
 
-        stop_music_button = ttk.Button(controls, text = "Stop playing", command = self.library.stop_track)
-        stop_music_button.grid(row = 3, column = 4, padx = 5, pady = 4)
-
-        pause_button = ttk.Button(controls, text="Pause", command=self.pause_playback)
-        pause_button.grid(row=3, column=5, padx=5)
-
-        stop_button = ttk.Button(controls, text="Stop", command=self.stop_playback)
-        stop_button.grid(row=3, column=6, padx=5)
-
-        self.tracklist_text = tk.Text(window, height = 18, width = 90)
+        self.tracklist_text = tk.Text(window, height = 22, width = 102)
         self.tracklist_text.pack(fill = "both", expand = True, padx = 10, pady = (0, 5))
         self.set_text(self.tracklist_text, "")
         ttk.Label(window, textvariable = self.status_text, padding = (10, 8)).pack(fill = "x")
@@ -158,117 +144,179 @@ class CreateTracklist:
         if not self.tracklist:
             self.status_text.set("List is empty. Please add some tracks in.")
             return
-        
-        self.playback_id += 1
-        current_id = self.playback_id
-        
+
         if self.is_paused:
+            self._mixer_check
             pygame.mixer.music.unpause()
             self.is_paused = False
             self.is_playing = True
             self.status_text.set("Resumed playback.")
-            self.window.after(1000, lambda: self._check_playback(current_id))
+            self.after_id = self.window.after(1000, self._check_track_end)
             return
+
+        self.stop_playback()
+        self.playback_id += 1
         self.current_index = 0
         self.is_playing = True
         self.is_paused = False
-        self.play_next_track(current_id)
-        
+        self.checking = True
+        self._play_next_in_tracklist(self.playback_id)
 
-    def play_next_track(self, playback_id):
-        if not self.is_playing or playback_id != self.playback_id:
+    def _play_next_in_tracklist(self, playback_id):
+        if playback_id != self.playback_id or not self.is_playing:
             return
+
         if self.current_index >= len(self.tracklist):
-            self.status_text.set("Played all tracks in tracklist.")
             self.is_playing = False
+            self.checking = False
+            self.status_text.set("Played all tracks in tracklist.")
             return
+
         track_number = self.tracklist[self.current_index]
+        name = self.library.get_name(track_number) or "Unknown"
+
         if self.library.play_track(track_number):
             self.library.increment_play_count(track_number)
-            name = self.library.get_name(track_number) or "Unknown"
             self.status_text.set(f"Now playing: '{name}'.")
-
-            
-            
         else:
-            self.status_text.set("Error playing track, skipping to next.")
+            self.status_text.set(f"Error playing '{name}', skipping to next.")
+
         self.current_index += 1
-        self.after_id = self.window.after(1000, lambda: self._check_playback(playback_id))
+        self.after_id = self.window.after(1000, lambda: self._check_track_end(playback_id))
+
+    def _play_track_at_index(self, index, playback_id = None):
+        if index < 0 or index >= len(self.tracklist):
+            self.status_text.set("Invalid track index.")
+            return
+        if playback_id is None:
+            playback_id = self.playback_id
+        
+        self.current_index = index
+        track_number = self.tracklist[index]
+        name = self.library.get_name(track_number)
+
+        if self.library.play_track(track_number):
+            self.library.increment_play_count(track_number)
+            self.status_text.set(f"Now playing: '{name}'.")
+        else:
+            self.status_text.set(f"Error playing '{name}', skipping to next.")
+        
+        self.after_id = self.window.after(1000, lambda: self._check_track_end(playback_id))
+
+    def skip_track(self):
+        if not self.tracklist:
+            self.status_text.set("Tracklist is empty.")
+            return
+        if self.current_index >= len(self.tracklist):
+            self.status_text.set("Already at the end of the tracklist.")
+            return
+        self.playback_id += 1
+        if self.after_id:
+            self.window.after_cancel(self.after_id)
+            self.after_id = None
+        self._mixer_check()
+        pygame.mixer.music.stop()
+
+        self.is_playing = True
+        self.is_paused = False
+        self.checking = True
+
+        self._play_track_at_index(self.current_index + 1, self.playback_id)
     
+    def reverse_track(self):
+        if not self.tracklist:
+            self.status_text.set("Tracklist is empty.")
+            return
+        if self.current_index <= 0:
+            self.status_text.set("Already at the beginning of the tracklist.")
+            return
+        self.playback_id += 1
+        if self.after_id:
+            self.window.after_cancel(self.after_id)
+            self.after_id = None
+        self._mixer_check()
+        pygame.mixer.music.stop()
+
+        self.is_playing = True
+        self.is_paused = False
+        self.checking = True
+
+        self._play_track_at_index(self.current_index - 1, self.playback_id)
     def pause_playback(self):
         if not self.is_playing:
             return
+        self._mixer_check()
         pygame.mixer.music.pause()
         self.is_paused = True
         self.is_playing = False
         self.status_text.set("Playback paused.")
-    
-    def stop_playback(self):
-        self.is_paused = False
-        self.is_playing = False
-        if self.after_id:
-            self.window.after_cancel(self.after_id)
-            self.after_id = None
-        pygame.mixer.music.stop()
-        self.status_text.set("Playback stopped.")
-
 
     def resume_playback(self):
-    
-
         if not self.is_paused:
             return
-
+        self._mixer_check()
         pygame.mixer.music.unpause()
         self.is_paused = False
         self.is_playing = True
         self.status_text.set("Playback resumed.")
-
-        if not self.checking:
-            self.checking = True
-            self.window.after(1000, self._check_track_end)
+        self.after_id = self.window.after(1000, self._check_track_end)
 
     def stop_playback(self):
-        
-
         self.is_playing = False
         self.is_paused = False
         self.checking = False
         self.current_index = 0
         self.playback_id += 1
 
+        if self.after_id:
+            self.window.after_cancel(self.after_id)
+            self.after_id = None
+        self._mixer_check()
         pygame.mixer.music.stop()
         self.status_text.set("Playback stopped.")
 
-    def _check_playback(self):
-        if not self.is_playing:
+    def _check_track_end(self, playback_id=None):
+        if playback_id is None:
+            playback_id = self.playback_id
+
+        if playback_id != self.playback_id or not self.is_playing:
             return
+
         if self.is_paused:
-            self.window.after(1000, lambda: self._check_playback(self.playback_id))
-            return 
+            self.after_id = self.window.after(1000, lambda: self._check_track_end(playback_id))
+            return
+
         if pygame.mixer.music.get_busy():
-            self.after_id = self.window.after(1000, lambda: self._check_playback(self.playback_id))
-        else:
-                self.play_next_track(self.playback_id)
+            self.after_id = self.window.after(1000, lambda: self._check_track_end(playback_id))
+            return
+
+        self._play_next_in_tracklist(playback_id)
+
+    def _mixer_check(self):
+        if pygame.mixer.get_init() is None:
+            pygame.mixer.init()
+
     def reset_tracklist(self):
         self.tracklist.clear()
         self._refresh_tracklist_text()
         self.status_text.set("Tracklist reset.")
     
-    def play_track(self):
-        raw = self.track_input.get().strip()
-        track_number = raw.zfill(2) if raw.isdigit() else raw
-
+    def _play_track_number(self, track_number):
         name = self.library.get_name(track_number)
-        if not name:
+        if name is None:
             self.status_text.set("Track not found in the library.")
             return
-
+        self.stop_playback()
         if self.library.play_track(track_number):
             self.library.increment_play_count(track_number)
             self.status_text.set(f"Played '{name}'.")
         else:
-            self.status_text.set("Error playing track.")
+            self.status_text.set("Error playing track.") 
+    
+    def play_track(self):
+        raw = self.track_input.get().strip()
+        track_number = raw.zfill(2) if raw.isdigit() else raw
+        self._play_track_number(track_number)
 
     def shuffle_tracklist(self):
         if len(self.tracklist) < 2:
@@ -300,13 +348,7 @@ class CreateTracklist:
             self.status_text.set("Invalid track position.")
             return
         track_number = self.tracklist[position - 1]
-        name = self.library.get_name(track_number) or "Unknown"
-        if self.library.play_track(track_number):
-            self.library.increment_play_count(track_number)
-            self.status_text.set(f"Played '{name}'.")
-        else:
-            self.status_text.set("Error playing track.")
-
+        self._play_track_number(track_number)
     def save_tracklist(self):
         try:
             with self.tracklist_file.open("w", newline="", encoding="utf-8") as file:

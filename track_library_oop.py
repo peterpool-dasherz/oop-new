@@ -145,21 +145,6 @@ class TrackLibrary:
                 matching_artist.append(self._format_track(track_number, item))
         return "\n".join(matching_artist)
     
-    def search_and_filter(self, query: str, artist: str) -> str:
-        query = query.strip().lower()
-        artist = artist.strip().lower()
-
-        result = []
-
-        for track_number, item in self.library.items():
-            #artist filter application
-            if artist != "all artists" and item.artist.lower() != artist:
-                continue
-            #query filter application
-            if query and (query not in item.name.lower()) and query not in item.artist.lower():
-                continue
-            result.append(self._format_track(track_number, item))
-        return "\n".join(result)
 
 
     def _init_audio(self):

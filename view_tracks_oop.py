@@ -9,7 +9,7 @@ class TrackViewer:
     def __init__(self, window, library=None):
         self.window = window
         self.window.title("View Tracks")
-        self.window.geometry("900x500")
+        self.window.geometry("1150x650")
         self.library = library or lib.TrackLibrary()
 
         self.track_input = tk.StringVar()
@@ -20,34 +20,44 @@ class TrackViewer:
         controls = ttk.Frame(self.window, padding = 10)
         controls.pack(fill = "x")
 
-        list_tracks_button = ttk.Button(controls, text = "List All Tracks", command = self.list_tracks).grid(row = 0, column = 0, padx = 5, pady = 4)
-        track_number_label = ttk.Label(controls, text = "Enter Track Number").grid(row = 0, column = 2, pady = 4)
-        track_number_entry = ttk.Entry(controls, width = 6, textvariable = self.track_input).grid(row = 0, column = 3, padx = 5, pady = 4)
-        view_tracks_button = ttk.Button(controls, text = "View Track", command = self.view_tracks).grid(row = 0, column = 4, padx = 10, pady = 4)
+        top_row = ttk.Frame(controls)
+        top_row.pack(fill = "x", pady = (0, 8))
 
-        search_label = ttk.Label(controls, text = "Search").grid(row = 0, column = 1, padx = 5, pady = 4)
-        search_entry = ttk.Entry(controls, width = 24, textvariable = self.search_input).grid(row = 1, column = 1, columnspan = 2, sticky = "w", pady = 4)
-        search_button = ttk.Button(controls, text = "Search", command = self.search_tracks).grid(row = 1, column = 3, padx = 10, pady = 4)
+        ttk.Button(top_row, text = "List All Tracks", command = self.list_tracks).pack(side = "left", padx = (0, 8))
+        ttk.Label(top_row, text = "Track Number").pack(side = "left", padx = (12, 4))
+        ttk.Entry(top_row, width = 8, textvariable = self.track_input).pack(side = "left", padx = (0, 8))
+        ttk.Button(top_row, text = "View Track", command = self.view_tracks).pack(side = "left")
 
-        filter_by_artist_label = ttk.Label(controls, text = "Filter by Artist").grid(row = 1, column = 4, padx = (20, 5), pady = 4)
+        search_row = ttk.Frame(controls)
+        search_row.pack(fill = "x")
+
+        ttk.Label(search_row, text = "Search").pack(side = "left", padx = (0, 4))
+        ttk.Entry(search_row, width = 28, textvariable = self.search_input).pack(side = "left", padx = (0, 10))
+        ttk.Button(search_row, text = "Search", command = self.search_tracks).pack(side = "left", padx = (0, 18))
+
+        ttk.Label(search_row, text = "Filter by Artist").pack(side = "left", padx = (0, 4))
         self.artists_filter_combobox = ttk.Combobox(
-            controls,
-            width = 22,
+            search_row,
+            width = 24,
             textvariable = self.artists_filter_input,
             values = ["All artists", *self.library.list_artists()],
             state = "readonly"
         )
-        self.artists_filter_combobox.grid(row = 1, column = 5, pady = 4)
-        filter_button = ttk.Button(controls, text = "Apply", command = self.filter_tracks).grid(row = 1, column = 6, padx = 10, pady = 4)
+        self.artists_filter_combobox.pack(side = "left", padx = (0, 8))
+        ttk.Button(search_row, text = "Apply", command = self.filter_tracks).pack(side = "left")
 
         content = ttk.Frame(self.window, padding = (10, 0, 10, 0))
         content.pack(fill = "both", expand = True)
 
-        self.list_text = tk.Text(content, height = 16, width = 60)
-        self.list_text.pack(side = "left", fill = "both", expand = True)
+        list_panel = ttk.LabelFrame(content, text = "Track List", padding = 8)
+        list_panel.pack(side = "left", fill = "both", expand = True)
+        self.list_text = tk.Text(list_panel, height = 22, width = 76)
+        self.list_text.pack(fill = "both", expand = True)
 
-        self.detail_text = tk.Text(content, height = 16, width = 30)
-        self.detail_text.pack(side = "left", fill = "y", padx = (20, 0))
+        detail_panel = ttk.LabelFrame(content, text = "Track Details", padding = 8)
+        detail_panel.pack(side = "left", fill = "y", padx = (12, 0))
+        self.detail_text = tk.Text(detail_panel, height = 22, width = 28)
+        self.detail_text.pack(fill = "both", expand = True)
 
         status_bar = ttk.Label(self.window, textvariable = self.status_text, padding = (10, 8))
         status_bar.pack(fill = "x")

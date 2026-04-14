@@ -9,23 +9,23 @@ class UpdateTracks:
     def __init__(self, window, library=None):
         self.window = window
         self.window.title("Update Track Rating")
-        self.window.geometry("900x500")
+        self.window.geometry("760x420")
         self.library = library or lib.TrackLibrary()
         self.track_input = tk.StringVar()
         self.rating_input = tk.StringVar()
         self.status_text = tk.StringVar(value = "Please enter track number and rating to update (tracks are rated from 1 to 5)")
 
-        form = ttk.Frame(window, padding = 12)
-        form.pack(fill = "x")
+        form = ttk.LabelFrame(window, text = "Update Rating", padding = 12)
+        form.pack(fill = "x", padx = 12, pady = (12, 8))
 
-        track_number_label = ttk.Label(form, text = "Track Number").grid(row = 0, column = 0, sticky = "w")
-        track_number_entry = ttk.Entry(form, width = 10, textvariable = self.track_input).grid(row = 0, column = 1, padx = (5, 20))
-        rating_label = ttk.Label(form, text = "New Rating").grid(row = 0, column = 2, sticky = "w")
-        rating_entry = ttk.Entry(form, width = 10, textvariable = self.rating_input).grid(row = 0, column = 3, padx = 5)
-        track_number_button = ttk.Button(form, text = "Update Track Rating", command = self.update_track).grid(row = 0, column = 4, padx = (15, 0))
+        ttk.Label(form, text = "Track Number").grid(row = 0, column = 0, sticky = "w")
+        ttk.Entry(form, width = 10, textvariable = self.track_input).grid(row = 0, column = 1, padx = (6, 18))
+        ttk.Label(form, text = "New Rating").grid(row = 0, column = 2, sticky = "w")
+        ttk.Entry(form, width = 10, textvariable = self.rating_input).grid(row = 0, column = 3, padx = (6, 18))
+        ttk.Button(form, text = "Update Track Rating", command = self.update_track).grid(row = 0, column = 4)
 
-        self.output = tk.Text(window, width = 70, height = 10)
-        self.output.pack(fill = "both", expand = True, padx = 12, pady = (8, 6))
+        self.output = tk.Text(window, width = 64, height = 12)
+        self.output.pack(fill = "both", expand = True, padx = 12, pady = (0, 6))
         self.set_text(self.output, "")
         status_label = ttk.Label(window, textvariable = self.status_text, padding = (12, 6)).pack(fill = "x")
 
