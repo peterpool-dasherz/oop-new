@@ -1,6 +1,6 @@
 <mxfile host="65bd71144e">
     <diagram id="usecase_oop" name="Use Case Diagram (OOP)">
-        <mxGraphModel dx="489" dy="584" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1300" pageHeight="1400" math="0" shadow="0">
+        <mxGraphModel dx="468" dy="404" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1300" pageHeight="1400" math="0" shadow="0">
             <root>
                 <mxCell id="0"/>
                 <mxCell id="1" parent="0"/>
@@ -13,13 +13,13 @@
                 <mxCell id="subsystem_player" value="&lt;b&gt;TrackPlayer (Main UI)&lt;/b&gt;" style="swimlane;whiteSpace=wrap;html=1;startSize=25;fillColor=#f8cecc;strokeColor=#b85450;" parent="system_boundary" vertex="1">
                     <mxGeometry x="40" y="40" width="240" height="220" as="geometry"/>
                 </mxCell>
-                <mxCell id="uc_open_viewer" value="Open View Tracks" style="ellipse;whiteSpace=wrap;html=1;" parent="subsystem_player" vertex="1">
+                <mxCell id="uc_open_viewer" value="Open Manage Tracks" style="ellipse;whiteSpace=wrap;html=1;" parent="subsystem_player" vertex="1">
                     <mxGeometry x="50" y="40" width="140" height="50" as="geometry"/>
                 </mxCell>
-                <mxCell id="uc_open_update" value="Open Update Tracks" style="ellipse;whiteSpace=wrap;html=1;" parent="subsystem_player" vertex="1">
+                <mxCell id="uc_open_update" value="Open Update Track Rating" style="ellipse;whiteSpace=wrap;html=1;" parent="subsystem_player" vertex="1">
                     <mxGeometry x="50" y="100" width="140" height="50" as="geometry"/>
                 </mxCell>
-                <mxCell id="uc_open_tracklist" value="Open Create Tracklist" style="ellipse;whiteSpace=wrap;html=1;" parent="subsystem_player" vertex="1">
+                <mxCell id="uc_open_tracklist" value="Open Manage Tracklist" style="ellipse;whiteSpace=wrap;html=1;" parent="subsystem_player" vertex="1">
                     <mxGeometry x="50" y="160" width="140" height="50" as="geometry"/>
                 </mxCell>
                 <mxCell id="subsystem_viewer" value="&lt;b&gt;TrackViewer&lt;/b&gt;" style="swimlane;whiteSpace=wrap;html=1;startSize=25;fillColor=#dae8fc;strokeColor=#6c8ebf;" parent="system_boundary" vertex="1">

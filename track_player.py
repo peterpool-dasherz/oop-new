@@ -6,7 +6,7 @@ from view_tracks import TrackViewer
 
 
 def view_tracks_clicked():
-    status_lbl.configure(text="View Tracks button was clicked!")
+    status_lbl.configure(text="Manage Tracks button was clicked!")
     TrackViewer(tk.Toplevel(window))
 
 
