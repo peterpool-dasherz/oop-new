@@ -1,3 +1,4 @@
+from struct import pack
 import tkinter as tk
 from tkinter import ttk
 import csv
@@ -33,6 +34,15 @@ class CreateTracklist:
         controls = ttk.Frame(window, padding = 10)
         controls.pack(fill = "x")
 
+        main_area = ttk.Frame(window, padding = (10, 0, 10, 0))
+        main_area.pack(side = "top", fill = "both", expand = True)
+
+        self.tracklist_text = tk.Text(main_area, height = 18, width = 102, bg = "#31384a", fg = "#e7eaf0", insertbackground = "#e7eaf0", selectbackground = "#5f8fbe")
+        self.tracklist_text.pack(fill = "both", expand = True)
+        self.set_text(self.tracklist_text, "")
+        self.load_tracklist(auto_load = True)
+
+
         track_frame = ttk.LabelFrame(controls, text = "Track Actions", padding = 8)
         track_frame.grid(row = 0, column = 0, sticky = "ew", padx = 4, pady = 4)
         ttk.Label(track_frame, text = "Track Number").grid(row = 0, column = 0, sticky = "w", padx = (0, 6))
@@ -47,15 +57,7 @@ class CreateTracklist:
         ttk.Entry(position_frame, width = 8, textvariable = self.tracklist_position).grid(row = 0, column = 1, padx = (0, 10))
         ttk.Button(position_frame, text = "Play Position", command = self.play_specific_track).grid(row = 0, column = 2, padx = 4)
 
-        playback_frame = ttk.LabelFrame(controls, text = "Playback", padding = 8)
-        playback_frame.grid(row = 1, column = 0, columnspan = 2, sticky = "ew", padx = 4, pady = 4)
-        ttk.Button(playback_frame, text = "Play Tracklist", command = self.play_tracklist).grid(row = 0, column = 0, padx = 4)
-        ttk.Button(playback_frame, text = "Pause", command = self.pause_playback).grid(row = 0, column = 1, padx = 4)
-        ttk.Button(playback_frame, text = "Resume", command = self.resume_playback).grid(row = 0, column = 2, padx = 4)
-        ttk.Button(playback_frame, text = "Stop", command = self.stop_playback).grid(row = 0, column = 3, padx = 4)
-        ttk.Button(playback_frame, text = "Skip", command = self.skip_track).grid(row = 0, column = 4, padx = 4)
-        ttk.Button(playback_frame, text = "Reverse", command = self.reverse_track).grid(row = 0, column = 5, padx = 4)
-
+        
         custom_frame = ttk.LabelFrame(controls, text = "Custom Track", padding = 8)
         custom_frame.grid(row = 2, column = 0, columnspan = 2, sticky = "ew", padx = 4, pady = 4)
         ttk.Label(custom_frame, text = "Name").grid(row = 0, column = 0, sticky = "w", padx = (0, 6))
@@ -73,12 +75,22 @@ class CreateTracklist:
         ttk.Button(library_frame, text = "Save", command = self.save_tracklist).grid(row = 0, column = 2, padx = 4)
         ttk.Button(library_frame, text = "Load", command = self.load_tracklist).grid(row = 0, column = 3, padx = 4)
 
-        self.tracklist_text = tk.Text(window, height = 22, width = 102, bg = "#31384a", fg = "#e7eaf0", insertbackground = "#e7eaf0", selectbackground = "#5f8fbe")
-        self.tracklist_text.pack(fill = "both", expand = True, padx = 10, pady = (0, 5))
-        self.set_text(self.tracklist_text, "")
-        ttk.Label(window, textvariable = self.status_text, padding = (10, 8)).pack(fill = "x")
-        self.load_tracklist(auto_load = True)
+        bottom_bar = ttk.Frame(window, padding = 10)
+        bottom_bar.pack(side = "bottom", fill = "x")
 
+        playback_frame = ttk.LabelFrame(bottom_bar, text = "Playback", padding = 8)
+        playback_frame.pack(fill = "x", pady = (0, 6))
+
+        ttk.Button(playback_frame, text = "Play Tracklist", command = self.play_tracklist).grid(row = 0, column = 0, padx = 4)
+        ttk.Button(playback_frame, text = "Pause", command = self.pause_playback).grid(row = 0, column = 1, padx = 4)
+        ttk.Button(playback_frame, text = "Resume", command = self.resume_playback).grid(row = 0, column = 2, padx = 4)
+        ttk.Button(playback_frame, text = "Stop", command = self.stop_playback).grid(row = 0, column = 3, padx = 4)
+        ttk.Button(playback_frame, text = "Skip", command = self.skip_track).grid(row = 0, column = 4, padx = 4)
+        ttk.Button(playback_frame, text = "Reverse", command = self.reverse_track).grid(row = 0, column = 5, padx = 4)
+
+        ttk.Label(bottom_bar, textvariable = self.status_text, padding = (10, 8)).pack(fill = "x")
+
+        
     def set_text(self, text_area, content):
         text_area.configure(state = "normal")
         text_area.delete("1.0", tk.END)
@@ -146,7 +158,7 @@ class CreateTracklist:
             return
 
         if self.is_paused:
-            self._mixer_check
+            self._mixer_check()
             pygame.mixer.music.unpause()
             self.is_paused = False
             self.is_playing = True
@@ -407,5 +419,6 @@ class CreateTracklist:
 if __name__ == "__main__":
     root = tk.Tk()
     font.configure()
+    font.apply_theme(root)
     CreateTracklist(root)
     root.mainloop()

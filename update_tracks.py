@@ -66,5 +66,6 @@ class UpdateTracks:
 if __name__ == "__main__":
     root = tk.Tk()
     font.configure()
+    font.apply_theme(root)
     UpdateTracks(root)
     root.mainloop()

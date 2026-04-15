@@ -144,5 +144,6 @@ class TrackViewer:
 if __name__ == "__main__":
     main_window = tk.Tk()
     font.configure()
+    font.apply_theme(main_window)
     TrackViewer(main_window)
     main_window.mainloop()

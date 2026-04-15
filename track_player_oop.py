@@ -20,6 +20,25 @@ class TrackPlayer:
         self.state_file = Path(__file__).with_name("saved_library.csv")
         self.window.protocol("WM_DELETE_WINDOW", self.on_close)
 
+        self.settings_file = Path(__file__).with_name("saved_theme.txt")
+        self.theme_mode = font.load_theme_mode(self.settings_file)
+        font.set_theme_mode(self.theme_mode)
+
+        if self.theme_mode == "System":
+            font.apply_device_theme(self.window)
+        else:
+            font.apply_theme(self.window, self.theme_mode)
+
+        self.logout_callback = None
+
+        def set_logout_callback(self, callback):
+            self.logout_callback = callback
+        
+        def logout(self):
+            self.library.save.lib_state(self.state_file)
+            self.window.destroy()
+            if self.logout_callback:
+                self.logout_callback()
         container = ttk.Frame(window, padding = 16)
         container.pack(fill = "both", expand = True)
 
@@ -35,6 +54,18 @@ class TrackPlayer:
         create_tracklist_button.pack(side = "left", padx = 12)
         update_tracks_button = ttk.Button(button_row, text = "Update Track Rating", command = self.open_update_tracks)
         update_tracks_button.pack(side = "left", padx = 12)
+
+        theme_frame = ttk.LabelFrame(container, text = "Theme", padding = 8)
+        theme_frame.pack(fill = "x", pady = (16, 0))
+
+        ttk.Label(theme_frame, text = "Select theme:").pack(side = "left", padx = (0, 12))
+        ttk.Button(theme_frame, text = "Mirror system settings", command = lambda: self.set_theme("System")).pack(side = "left", padx = 4)
+        ttk.Button(theme_frame, text = "Light", command = lambda: self.set_theme("Light")).pack(side = "left", padx = 4)
+        ttk.Button(theme_frame, text = "Dark", command = lambda: self.set_theme("Dark")).pack(side = "left", padx = 4)
+
+        ttk.Button(button_row, text = "Logout", command = self.logout).pack(side = "left", padx = 12)
+        
+
         
     def open_view_tracks_oop(self):
         TrackViewer(tk.Toplevel(self.window), self.library)
@@ -44,12 +75,80 @@ class TrackPlayer:
         UpdateTracks(tk.Toplevel(self.window), self.library)
     def on_close(self):
         self.library.save_lib_state(self.state_file)
+        font.save_theme_mode(self.settings_file, self.theme_mode)
         self.window.destroy()
+    def set_theme(self, mode):
+        self.theme_mode = mode
+        font.set_theme_mode(mode)
+        font.save_theme_mode(self.settings_file, mode)
+        
 
-if __name__ == "__main__":
+        if mode == "System":
+            font.apply_device_theme(self.window)
+        else:
+            font.apply_theme(self.window, mode)
+
+class LoginWindow:
+    def __init__(self, root, on_success):
+        self.root = root
+        self.on_success = on_success
+
+        self.root.title = ("Login")
+        self.root.geometry = ("360 x 220")
+        self.root.resizable(False, False)
+        self.username_var = tk.StringVar()
+        self.password_var = tk.StringVar()
+        self.message_var = tk.StringVar(value = "Please login to continue.")
+
+        frame = ttk.Frame(root, padding = 16)
+        frame.pack(fill = "both", expand = True)
+        ttk.Label(frame, text = "Username").grid(row = 0, column = 0, sticky = "w", pady = (0, 8))
+        ttk.Entry(frame, textvariable = self.username_var, width = 28).grid(row = 0, column = 1, pady = (0, 8))
+
+        ttk.Label(frame, text = "Password").grid(row = 1, column = 0, sticky = "w", pady = (0, 8))
+        ttk.Entry(frame, textvariable = self.password_var, width = 28, show = "*").grid(row = 1, column = 1, pady = (0, 8))
+
+        ttk.Button(frame, text = "Login", command = self.login).grid(row = 2, column = 0, columnspan = 2, pady = (10, 8))
+        ttk.Label(frame, textvariable = self.message_var).grid(row = 3, column = 0, columnspan = 2)
+        self.root.bind("<Return>", lambda event: self.login())
+    
+    def login(self):
+        username = self.username_var.get().strip().lower()
+        password = self.password_var.get().strip()
+
+        if not username or not password:
+            self.message_var.set("Please enter your username and password.")
+            return
+        if username == "testing account" and password == "123":
+            self.root.destroy()
+            self.on_success()
+        else:
+            self.message_var.set("Invalid username or password, please try again.")
+    
+settings_file = Path(__file__).with_name("saved_theme.txt")
+def apply_saved_theme(window):
+    theme_mode = font.load_theme_mode(settings_file)
+    if theme_mode == "System":
+        font.apply_device_theme(window)
+    else:
+        font.apply_theme(window, theme_mode)
+
+def launch_main_app():
     root = tk.Tk()
     font.configure()
-    font.apply_dark_theme(root)
+    apply_saved_theme(root)
     app = TrackPlayer(root)
-    root.protocol( "WM_DELETE_WINDOW", app.on_close)
+    app.set_logout_callback(launch_login)
+    root.protocol("WM_DELETE_WINDOW", app.on_close)
     root.mainloop()
+
+def launch_login():
+    login_root = tk.Tk()
+    apply_saved_theme(login_root)
+    LoginWindow(login_root, launch_main_app)
+    login_root.mainloop()
+
+
+
+if __name__ == "__main__":
+    launch_login()
