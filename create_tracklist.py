@@ -9,11 +9,12 @@ import track_library_oop as lib
 import pygame 
 
 
+
 class CreateTracklist:
     def __init__(self, window, library=None):
         self.window = window
         self.window.title("Create Tracklist")
-        self.window.geometry("1300x720")
+        self.window.geometry("1300x850")
         self.library = library or lib.TrackLibrary()
         self.track_input = tk.StringVar()
         self.tracklist_position = tk.StringVar()
@@ -81,12 +82,12 @@ class CreateTracklist:
         playback_frame = ttk.LabelFrame(bottom_bar, text = "Playback", padding = 8)
         playback_frame.pack(fill = "x", pady = (0, 6))
 
-        ttk.Button(playback_frame, text = "Play Tracklist", command = self.play_tracklist).grid(row = 0, column = 0, padx = 4)
-        ttk.Button(playback_frame, text = "Pause", command = self.pause_playback).grid(row = 0, column = 1, padx = 4)
-        ttk.Button(playback_frame, text = "Resume", command = self.resume_playback).grid(row = 0, column = 2, padx = 4)
-        ttk.Button(playback_frame, text = "Stop", command = self.stop_playback).grid(row = 0, column = 3, padx = 4)
-        ttk.Button(playback_frame, text = "Skip", command = self.skip_track).grid(row = 0, column = 4, padx = 4)
-        ttk.Button(playback_frame, text = "Reverse", command = self.reverse_track).grid(row = 0, column = 5, padx = 4)
+        self.play_stop_button = ttk.Button(playback_frame, text = "Play / Stop tracklist", command = self.toggle_play_stop)
+        self.play_stop_button.grid(row = 0, column = 0, padx = 4)
+        self.pause_resume_button = ttk.Button(playback_frame, text = "Pause / Resume", command = self.toggle_pause_resume)
+        self.pause_resume_button.grid(row = 0, column = 1, padx = 4)
+        ttk.Button(playback_frame, text = "Skip", command = self.skip_track).grid(row = 0, column = 2, padx = 4)
+        ttk.Button(playback_frame, text = "Reverse", command = self.reverse_track).grid(row = 0, column = 3, padx = 4)
 
         ttk.Label(bottom_bar, textvariable = self.status_text, padding = (10, 8)).pack(fill = "x")
 
@@ -155,24 +156,35 @@ class CreateTracklist:
     def play_tracklist(self):
         if not self.tracklist:
             self.status_text.set("List is empty. Please add some tracks in.")
-            return
-
-        if self.is_paused:
-            self._mixer_check()
-            pygame.mixer.music.unpause()
-            self.is_paused = False
-            self.is_playing = True
-            self.status_text.set("Resumed playback.")
-            self.after_id = self.window.after(1000, self._check_track_end)
-            return
-
+        
         self.stop_playback()
         self.playback_id += 1
         self.current_index = 0
         self.is_playing = True
         self.is_paused = False
-        self.checking = True
+        self.checking = True 
+        self.play_stop_button.configure(text = "Stop Tracklist")
+        self.pause_resume_button.configure(text = "Pause")
         self._play_next_in_tracklist(self.playback_id)
+
+
+    def toggle_play_stop(self):
+        if self.is_playing or self.is_paused:
+            self.stop_playback()
+        else:
+            self.play_tracklist()
+            self.play_stop_button.configure(text = "Stop Tracklist")
+            self.pause_resume_button.configure(text = "Pause")
+    
+    def toggle_pause_resume(self):
+        if self.is_paused:
+            self.resume_playback()
+            self.pause_resume_button.configure(text = "Pause")
+        else:
+            self.pause_playback()
+            self.pause_resume_button.configure(text = "Resume")
+        
+
 
     def _play_next_in_tracklist(self, playback_id):
         if playback_id != self.playback_id or not self.is_playing:
@@ -198,78 +210,98 @@ class CreateTracklist:
 
     def _play_track_at_index(self, index, playback_id = None):
         if index < 0 or index >= len(self.tracklist):
-            self.status_text.set("Invalid track index.")
+            self.status_text.set("Error playing track, please try again.")
             return
+        
         if playback_id is None:
             playback_id = self.playback_id
         
         self.current_index = index
         track_number = self.tracklist[index]
-        name = self.library.get_name(track_number)
+        name = self.library.get_name(track_number) or "Unknown"
 
         if self.library.play_track(track_number):
             self.library.increment_play_count(track_number)
             self.status_text.set(f"Now playing: '{name}'.")
         else:
-            self.status_text.set(f"Error playing '{name}', skipping to next.")
+            self.status_text.set(f"Error playing '{name}', skipping to next track.")
         
         self.after_id = self.window.after(1000, lambda: self._check_track_end(playback_id))
 
+
     def skip_track(self):
         if not self.tracklist:
-            self.status_text.set("Tracklist is empty.")
+            self.status_text.set("List is empty. Please add some tracks in.")
             return
-        if self.current_index >= len(self.tracklist):
-            self.status_text.set("Already at the end of the tracklist.")
+        
+        if self.current_index >= len(self.tracklist) - 1:
+            self.status_text.set("You've already at the end of the tracklist.")
             return
+        
         self.playback_id += 1
-        if self.after_id:
+        if self.after_id == 1:
             self.window.after_cancel(self.after_id)
             self.after_id = None
+        
         self._mixer_check()
         pygame.mixer.music.stop()
-
+        
         self.is_playing = True
         self.is_paused = False
-        self.checking = True
+        self.checking = True 
 
         self._play_track_at_index(self.current_index + 1, self.playback_id)
-    
+
     def reverse_track(self):
         if not self.tracklist:
-            self.status_text.set("Tracklist is empty.")
+            self.status_text.set("List is empty. Please add some tracks in.")
             return
+        
         if self.current_index <= 0:
-            self.status_text.set("Already at the beginning of the tracklist.")
+            self.status_text.set("You are at the beginning of the tracklist.")
             return
+        
         self.playback_id += 1
+        
         if self.after_id:
             self.window.after_cancel(self.after_id)
             self.after_id = None
+        
         self._mixer_check()
         pygame.mixer.music.stop()
 
         self.is_playing = True
-        self.is_paused = False
+        self.is_paused = False 
         self.checking = True
 
         self._play_track_at_index(self.current_index - 1, self.playback_id)
+
+
     def pause_playback(self):
-        if not self.is_playing:
-            return
         self._mixer_check()
+
+        if not self.is_playing and not self.is_paused:
+            self.status_text.set("Nothing is currently playing.")
+            return
+        
         pygame.mixer.music.pause()
         self.is_paused = True
         self.is_playing = False
         self.status_text.set("Playback paused.")
 
+
+
+
     def resume_playback(self):
-        if not self.is_paused:
-            return
         self._mixer_check()
+
+        if not self.is_paused:
+            self.status_text.set("Playback is currently active")
+            return
+        
         pygame.mixer.music.unpause()
-        self.is_paused = False
         self.is_playing = True
+        self.is_paused = False
         self.status_text.set("Playback resumed.")
         self.after_id = self.window.after(1000, self._check_track_end)
 
@@ -282,26 +314,39 @@ class CreateTracklist:
 
         if self.after_id:
             self.window.after_cancel(self.after_id)
-            self.after_id = None
+            self.after_id = None 
+        
         self._mixer_check()
         pygame.mixer.music.stop()
         self.status_text.set("Playback stopped.")
 
-    def _check_track_end(self, playback_id=None):
+        if hasattr(self, "play_stop_button"):
+            self.play_stop_button.configure(text = "Play Tracklist")
+        if hasattr(self, "pause_resume_button"):
+            self.pause_resume_button.configure(text = "Pause")
+        
+        if getattr(self, "play_stop_button", None) is not None:
+            self.play_stop_button.configure(text = "Play Tracklist")
+        if getattr(self, "pause_resume_button", None) is not None:
+            self.pause_resume_button.configure(text = "Pause")
+    
+    def _stop_single_track(self):
+        self._mixer_check()
+        pygame.music.mixer.stop()
+
+
+    def _check_track_end(self, playback_id = None):
         if playback_id is None:
             playback_id = self.playback_id
-
         if playback_id != self.playback_id or not self.is_playing:
             return
-
         if self.is_paused:
             self.after_id = self.window.after(1000, lambda: self._check_track_end(playback_id))
             return
-
         if pygame.mixer.music.get_busy():
             self.after_id = self.window.after(1000, lambda: self._check_track_end(playback_id))
             return
-
+        
         self._play_next_in_tracklist(playback_id)
 
     def _mixer_check(self):
@@ -316,14 +361,20 @@ class CreateTracklist:
     def _play_track_number(self, track_number):
         name = self.library.get_name(track_number)
         if name is None:
-            self.status_text.set("Track not found in the library.")
+            self.status_text.set("Track not found.")
             return
-        self.stop_playback()
+        
+        self._mixer_check()
+        pygame.mixer.music.stop()
+
         if self.library.play_track(track_number):
             self.library.increment_play_count(track_number)
+            self.is_playing = True
+            self.is_paused = False
             self.status_text.set(f"Played '{name}'.")
         else:
-            self.status_text.set("Error playing track.") 
+            self.status_text.set("Error playing track, please try again.")
+    
     
     def play_track(self):
         raw = self.track_input.get().strip()
@@ -419,6 +470,12 @@ class CreateTracklist:
 if __name__ == "__main__":
     root = tk.Tk()
     font.configure()
-    font.apply_theme(root)
+
+    theme_mode = Path(__file__).with_name("saved_theme.txt")
+    if theme_mode == "System":
+        font.apply_device_theme(root)
+    else:
+        font.apply_theme(root, theme_mode)
+
     CreateTracklist(root)
     root.mainloop()

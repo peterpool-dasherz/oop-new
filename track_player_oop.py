@@ -7,6 +7,18 @@ from update_tracks import UpdateTracks
 from view_tracks_oop import TrackViewer
 from pathlib import Path
 
+session_file = Path(__file__).with_name("session.txt")
+
+def save_session():
+    session_file.write_text("logged in", encoding = "utf-8")
+
+def clear_session():
+    if session_file.exists():
+        session_file.unlink()
+
+def session_exists():
+    return session_file.exists()
+
 class TrackPlayer:
     def __init__(self, window):
         self.window = window
@@ -31,14 +43,6 @@ class TrackPlayer:
 
         self.logout_callback = None
 
-        def set_logout_callback(self, callback):
-            self.logout_callback = callback
-        
-        def logout(self):
-            self.library.save.lib_state(self.state_file)
-            self.window.destroy()
-            if self.logout_callback:
-                self.logout_callback()
         container = ttk.Frame(window, padding = 16)
         container.pack(fill = "both", expand = True)
 
@@ -64,9 +68,19 @@ class TrackPlayer:
         ttk.Button(theme_frame, text = "Dark", command = lambda: self.set_theme("Dark")).pack(side = "left", padx = 4)
 
         ttk.Button(button_row, text = "Logout", command = self.logout).pack(side = "left", padx = 12)
-        
 
         
+
+    def set_logout_callback(self, callback):
+        self.logout_callback = callback
+        
+    def logout(self):
+        clear_session()
+        self.library.save_lib_state(self.state_file)
+        self.window.destroy()
+        if self.logout_callback:
+            self.logout_callback()
+    
     def open_view_tracks_oop(self):
         TrackViewer(tk.Toplevel(self.window), self.library)
     def open_create_tracklist(self):
@@ -87,6 +101,11 @@ class TrackPlayer:
             font.apply_device_theme(self.window)
         else:
             font.apply_theme(self.window, mode)
+        
+        
+
+        
+   
 
 class LoginWindow:
     def __init__(self, root, on_success):
@@ -120,6 +139,7 @@ class LoginWindow:
             self.message_var.set("Please enter your username and password.")
             return
         if username == "testing account" and password == "123":
+            save_session()
             self.root.destroy()
             self.on_success()
         else:
@@ -136,19 +156,41 @@ def apply_saved_theme(window):
 def launch_main_app():
     root = tk.Tk()
     font.configure()
-    apply_saved_theme(root)
+    theme_mode = font.load_theme_mode(Path(__file__).with_name("saved_theme.txt"))
+    font.set_theme_mode(theme_mode)
+
+    if theme_mode == "System":
+        font.apply_device_theme(root)
+    else:
+        font.apply_theme(root, theme_mode)
+    
     app = TrackPlayer(root)
     app.set_logout_callback(launch_login)
     root.protocol("WM_DELETE_WINDOW", app.on_close)
     root.mainloop()
 
+
+
 def launch_login():
     login_root = tk.Tk()
-    apply_saved_theme(login_root)
+    font.configure()
+
+    theme_mode = font.load_theme_mode(Path(__file__).with_name("saved_theme.txt"))
+    font.set_theme_mode(theme_mode)
+
+    if theme_mode == "System":
+        font.apply_device_theme(login_root)
+    else:
+        font.apply_theme(login_root, theme_mode)
+    
     LoginWindow(login_root, launch_main_app)
     login_root.mainloop()
 
 
 
+
 if __name__ == "__main__":
-    launch_login()
+    if session_exists():
+        launch_main_app()
+    else:
+        launch_login()
