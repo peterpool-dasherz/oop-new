@@ -1,12 +1,12 @@
 import tkinter as tk
 from tkinter import ttk
-
+from pathlib import Path
 import font_manager as font
 import track_library_oop as lib
 
 
 class UpdateTracks:
-    def __init__(self, window, library=None):
+    def __init__(self, window, library = None, theme_mode = "System"):
         self.window = window
         self.window.title("Update Track Rating")
         self.window.geometry("760x420")
@@ -14,6 +14,8 @@ class UpdateTracks:
         self.track_input = tk.StringVar()
         self.rating_input = tk.StringVar()
         self.status_text = tk.StringVar(value = "Please enter track number and rating to update (tracks are rated from 1 to 5)")
+        
+        self.theme_mode = theme_mode
 
         form = ttk.LabelFrame(window, text = "Update Rating", padding = 12)
         form.pack(fill = "x", padx = 12, pady = (12, 8))
@@ -28,6 +30,11 @@ class UpdateTracks:
         self.output.pack(fill = "both", expand = True, padx = 12, pady = (0, 6))
         self.set_text(self.output, "")
         status_label = ttk.Label(window, textvariable = self.status_text, padding = (12, 6)).pack(fill = "x")
+
+        if self.theme_mode == "System":
+            font.apply_device_theme(self.window)
+        else:
+            font.apply_theme(self.window, self.theme_mode)
 
     def set_text(self, text_area, content):
         text_area.configure(state = "normal")
@@ -66,6 +73,12 @@ class UpdateTracks:
 if __name__ == "__main__":
     root = tk.Tk()
     font.configure()
-    font.apply_theme(root)
-    UpdateTracks(root)
+
+    theme_mode = font.load_theme_mode(Path(__file__).with_name("saved_theme.txt"))
+
+    if theme_mode == "System":
+        font.apply_device_theme(root)
+    else:
+        font.apply_theme(root, theme_mode)
+    UpdateTracks(root, theme_mode = theme_mode)
     root.mainloop()

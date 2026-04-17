@@ -7,11 +7,12 @@ import random
 import font_manager as font
 import track_library_oop as lib
 import pygame 
+from tkinter import messagebox
 
 
 
 class CreateTracklist:
-    def __init__(self, window, library=None):
+    def __init__(self, window, library = None, theme_mode = "System"):
         self.window = window
         self.window.title("Create Tracklist")
         self.window.geometry("1300x850")
@@ -30,6 +31,7 @@ class CreateTracklist:
         self.after_id = None
         self.playback_id = 0
         self.checking = False
+        self.theme_mode = theme_mode
         
 
         controls = ttk.Frame(window, padding = 10)
@@ -93,6 +95,10 @@ class CreateTracklist:
 
         ttk.Label(bottom_bar, textvariable = self.status_text, padding = (10, 8)).pack(fill = "x")
 
+        if self.theme_mode == "System":
+            font.apply_device_theme(self.window)
+        else:
+            font.apply_theme(self.window, self.theme_mode)
         
     def set_text(self, text_area, content):
         text_area.configure(state = "normal")
@@ -117,10 +123,19 @@ class CreateTracklist:
     def add_track(self):
         raw = self.track_input.get().strip()
         track_number = raw.zfill(2) if raw.isdigit() else raw
+        
         name = self.library.get_name(track_number)
         if not name:
             self.status_text.set("Invalid track number, please enter a valid track number.")
             return
+        
+        if track_number in self.tracklist:
+            confirm = messagebox.askyesno("Duplicate track", f"'{name}' is already in your tracklist.\n\ Add it anyway?")
+            if not confirm:
+                self.status_text.set("Track is not added.")
+                return
+            
+
         self.tracklist.append(track_number)
         self._refresh_tracklist_text()
         self.status_text.set(f"Added '{name}' to tracklist.")
@@ -500,5 +515,5 @@ if __name__ == "__main__":
     else:
         font.apply_theme(root, theme_mode)
 
-    CreateTracklist(root)
+    CreateTracklist(root, theme_mode = theme_mode)
     root.mainloop()

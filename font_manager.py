@@ -112,7 +112,7 @@ def _apply_widget_tree(widget, colors):
         elif isinstance(widget, tk.Label):
             widget.configure(bg = colors["bg"], fg = colors["text_fg"])
         elif isinstance(widget, tk.Text):
-            widget.configure(bg = colors["input_bg"], fg = colors["text_bg"], insertbackground = colors["text_fg"], selectbackground = colors["accent_hover"])
+            widget.configure(bg = colors["input_bg"], fg = colors["text_fg"], insertbackground = colors["text_fg"], selectbackground = colors["accent_hover"])
     except tk.TclError:
         pass
 

@@ -6,6 +6,7 @@ from create_tracklist import CreateTracklist
 from update_tracks import UpdateTracks
 from view_tracks_oop import TrackViewer
 from pathlib import Path
+from tkinter import messagebox
 
 session_file = Path(__file__).with_name("session.txt")
 
@@ -42,6 +43,7 @@ class TrackPlayer:
             font.apply_theme(self.window, self.theme_mode)
 
         self.logout_callback = None
+        self.create_tracklist_app = None
 
         container = ttk.Frame(window, padding = 16)
         container.pack(fill = "both", expand = True)
@@ -82,11 +84,11 @@ class TrackPlayer:
             self.logout_callback()
     
     def open_view_tracks_oop(self):
-        TrackViewer(tk.Toplevel(self.window), self.library)
+        TrackViewer(tk.Toplevel(self.window), self.library, theme_mode = self.theme_mode, on_play_track = self.play_track_now, on_add_to_tracklist = self.add_track_to_tracklist)
     def open_create_tracklist(self):
-        CreateTracklist(tk.Toplevel(self.window), self.library)
+        self.create_tracklist_app = CreateTracklist(tk.Toplevel(self.window), self.library, theme_mode = self.theme_mode)
     def open_update_tracks(self):
-        UpdateTracks(tk.Toplevel(self.window), self.library)
+        UpdateTracks(tk.Toplevel(self.window), self.library, theme_mode = self.theme_mode)
     def on_close(self):
         self.library.save_lib_state(self.state_file)
         font.save_theme_mode(self.settings_file, self.theme_mode)
@@ -101,6 +103,57 @@ class TrackPlayer:
             font.apply_device_theme(self.window)
         else:
             font.apply_theme(self.window, mode)
+    
+    def play_track_now(self, track_number):
+        if not track_number:
+            return False
+        
+        if track_number.isdigit():
+            track_number = track_number.zfill(2)
+        else:
+            track_number = track_number.upper()
+        
+        if self.library.get_name(track_number) is None:
+            return False
+        
+        self.library.stop_track()
+        played = self.library.play_track(track_number)
+        if played:
+            self.library.increment_play_count(track_number)
+            self.tracklist_playing = False
+            self.is_playing = True
+            self.is_paused = False
+        return played 
+    
+
+    
+    def add_track_to_tracklist(self, track_number):
+        if not track_number:
+            return False
+        
+        if track_number.isdigit():
+            track_number = track_number.zfill(2)
+        else:
+            track_number = track_number.upper()
+        
+        if self.library.get_name(track_number) is None:
+            return False
+        
+        if getattr(self, "create_tracklist_app", None) is None:
+            self.open_create_tracklist()
+        
+        if track_number in self.create_tracklist_app.tracklist:
+            track_name = self.library.get_name(track_number) or track_number 
+            confirm = messagebox.askyesno("Duplicate track", f"{track_name} is already in your tracklist.\n\ Add it anyway?")
+            if not confirm:
+                return False
+            
+        
+        self.create_tracklist_app.tracklist.append(track_number)
+        self.create_tracklist_app._refresh_tracklist_text()
+        self.create_tracklist_app.save_tracklist()
+        return True
+    
         
         
 

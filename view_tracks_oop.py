@@ -1,12 +1,12 @@
 import tkinter as tk
 from tkinter import ttk
-
+from pathlib import Path
 import font_manager as font
 import track_library_oop as lib
 
 
 class TrackViewer:
-    def __init__(self, window, library=None):
+    def __init__(self, window, library = None, theme_mode = "System", on_play_track = None, on_add_to_tracklist = None):
         self.window = window
         self.window.title("View Tracks")
         self.window.geometry("1150x650")
@@ -16,6 +16,10 @@ class TrackViewer:
         self.search_input = tk.StringVar()
         self.artists_filter_input = tk.StringVar(value = "All artists")
         self.status_text = tk.StringVar(value = "Please enter track number to view track")
+
+        self.theme_mode = theme_mode
+        self.on_play_track = on_play_track
+        self.on_add_to_tracklist = on_add_to_tracklist
 
         controls = ttk.Frame(self.window, padding = 10)
         controls.pack(fill = "x")
@@ -27,6 +31,8 @@ class TrackViewer:
         ttk.Label(top_row, text = "Track Number").pack(side = "left", padx = (12, 4))
         ttk.Entry(top_row, width = 8, textvariable = self.track_input).pack(side = "left", padx = (0, 8))
         ttk.Button(top_row, text = "View Track", command = self.view_tracks).pack(side = "left")
+        ttk.Button(top_row, text = "Play selected track", command = self.play_selected_track).pack(side = "left", padx = (0, 8))
+        ttk.Button(top_row, text = "Add to Tracklist", command = self.add_selected_to_tracklist).pack(side = "left")
 
         search_row = ttk.Frame(controls)
         search_row.pack(fill = "x")
@@ -64,6 +70,11 @@ class TrackViewer:
         status_bar = ttk.Label(self.window, textvariable = self.status_text, padding = (10, 8))
         status_bar.pack(fill = "x")
         self.refresh_artist_options()
+
+        if self.theme_mode == "System":
+            font.apply_device_theme(self.window)
+        else:
+            font.apply_theme(self.window, self.theme_mode)
 
     def set_text(self, text_area, content):
         text_area.configure(state = "normal")
@@ -141,9 +152,52 @@ class TrackViewer:
         self.search_input.set("")
         self.artists_filter_input.set("All artists")
         self.status_text.set("All fields cleared")
+    
+    def _get_track_number_from_input(self):
+        raw_track = self.track_input.get().strip()
+        if not raw_track:
+            return None
+        if raw_track.isdigit():
+            return raw_track.zfill(2)
+        return raw_track.upper()
+    
+    def play_selected_track(self):
+        track_number = self._get_track_number_from_input()
+        if not track_number:
+            self.status_text.set("Please enter a track number.")
+            return
+        
+        if self.on_play_track is None:
+            self.status_text.set("Error occurred, please try again.")
+            return
+        
+        if self.on_play_track(track_number):
+            self.status_text.set(f"Played '{track_number}'.")
+        else:
+            self.status_text.set("Error occurred, please try again.")
+    
+    def add_selected_to_tracklist(self):
+        track_number = self._get_track_number_from_input()
+        if not track_number:
+            self.status_text.set("Please enter a track number.")
+            return
+        
+        if self.on_add_to_tracklist is None:
+            self.status_text.set("Error occurred, please try again.")
+            return
+        
+        if self.on_add_to_tracklist(track_number):
+            self.status_text.set(f"Added '{track_number}' to tracklist.")
+        else:
+            self.status_text.set("Error occurred, please try again.")
+
 if __name__ == "__main__":
     main_window = tk.Tk()
     font.configure()
-    font.apply_theme(main_window)
-    TrackViewer(main_window)
+    theme_mode = font.load_theme_mode(Path(__file__).with_name("saved_theme.txt"))
+    if theme_mode == "System":
+        font.apply_device_theme(main_window)
+    else:
+        font.apply_theme(main_window, theme_mode)
+    TrackViewer(main_window, theme_mode = theme_mode)
     main_window.mainloop()
