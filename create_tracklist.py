@@ -43,6 +43,8 @@ class CreateTracklist:
         self.set_text(self.tracklist_text, "")
         self.load_tracklist(auto_load = True)
 
+        self.tracklist_playing = False
+
 
         track_frame = ttk.LabelFrame(controls, text = "Track Actions", padding = 8)
         track_frame.grid(row = 0, column = 0, sticky = "ew", padx = 4, pady = 4)
@@ -156,15 +158,21 @@ class CreateTracklist:
     def play_tracklist(self):
         if not self.tracklist:
             self.status_text.set("List is empty. Please add some tracks in.")
+            return
         
         self.stop_playback()
         self.playback_id += 1
         self.current_index = 0
         self.is_playing = True
         self.is_paused = False
-        self.checking = True 
-        self.play_stop_button.configure(text = "Stop Tracklist")
-        self.pause_resume_button.configure(text = "Pause")
+        self.checking = True
+        self.tracklist_playing = True
+
+        if getattr(self, "play_stop_button", None) is not None:
+            self.play_stop_button.configure(text = "Stop Tracklist")
+        if getattr(self, "pause_resume_button", None) is not None:
+            self.pause_resume_button.configure(text = "Pause")
+
         self._play_next_in_tracklist(self.playback_id)
 
 
@@ -189,92 +197,105 @@ class CreateTracklist:
     def _play_next_in_tracklist(self, playback_id):
         if playback_id != self.playback_id or not self.is_playing:
             return
+        
+        while self.current_index < len(self.tracklist):
+            track_number = self.tracklist[self.current_index]
+            name = self.library.get_name(track_number) or "Unknown"
 
-        if self.current_index >= len(self.tracklist):
+            if self.library.play_track(track_number):
+                self.library.increment_play_count(track_number)
+                self.status_text.set(f"Played '{name}'.")
+                self.current_index += 1
+                self.after_id = self.window.after(1000, lambda: self._check_track_end(playback_id))
+                return
+
+            self.status_text.set(f"Error playing '{name}'. Skipping to next track.")
+            self.current_index += 1
+
             self.is_playing = False
+            self.is_paused = False
             self.checking = False
-            self.status_text.set("Played all tracks in tracklist.")
-            return
+            self.tracklist_playing = False
+            self.status_text.set("Played all tracks in tracklist")       
+    
 
-        track_number = self.tracklist[self.current_index]
-        name = self.library.get_name(track_number) or "Unknown"
-
-        if self.library.play_track(track_number):
-            self.library.increment_play_count(track_number)
-            self.status_text.set(f"Now playing: '{name}'.")
-        else:
-            self.status_text.set(f"Error playing '{name}', skipping to next.")
-
-        self.current_index += 1
-        self.after_id = self.window.after(1000, lambda: self._check_track_end(playback_id))
 
     def _play_track_at_index(self, index, playback_id = None):
-        if index < 0 or index >= len(self.tracklist):
-            self.status_text.set("Error playing track, please try again.")
+        if index < 0 or index == len(self.tracklist):
+            self.status_text.set("Error playing track. Please try again.")
             return
         
         if playback_id is None:
             playback_id = self.playback_id
         
-        self.current_index = index
         track_number = self.tracklist[index]
         name = self.library.get_name(track_number) or "Unknown"
 
         if self.library.play_track(track_number):
             self.library.increment_play_count(track_number)
-            self.status_text.set(f"Now playing: '{name}'.")
+            self.status_text.set(f"Played '{name}'.")
         else:
-            self.status_text.set(f"Error playing '{name}', skipping to next track.")
+            self.status_text.set(f"Error playing '{name}'. Skipping to next track.")
         
+        self.current_index = index + 1
         self.after_id = self.window.after(1000, lambda: self._check_track_end(playback_id))
 
-
     def skip_track(self):
+        if not self.tracklist_playing:
+            self.status_text.set("Nothing is currently playing.")
+            return
+        
         if not self.tracklist:
             self.status_text.set("List is empty. Please add some tracks in.")
             return
         
-        if self.current_index >= len(self.tracklist) - 1:
-            self.status_text.set("You've already at the end of the tracklist.")
+        if self.current_index >= len(self.tracklist):
+            self.status_text.set("You are already at the end of the tracklist.")
             return
         
         self.playback_id += 1
-        if self.after_id == 1:
+
+        if self.after_id:
             self.window.after_cancel(self.after_id)
             self.after_id = None
+
+        self._mixer_check()
+        pygame.mixer.music.stop()
+
+        self.is_playing = True
+        self.is_paused = False
+        self.checking = True
+
+        self._play_track_at_index(self.current_index, self.playback_id)
+
+    def reverse_track(self):
+        if not self.tracklist_playing:
+            self.status_text.set("Nothing is currently playing.")
+            return
         
+        if not self.tracklist:
+            self.status_text.set("List is empty. Please add some tracks in.")
+            return
+        
+        if self.current_index <= 1:
+            self.status_text.set("You are at the beginning of the tracklist.")
+            return
+        
+        self.playback_id += 1
+
+        if self.after_id:
+            self.window.after_cancel(self.after_id)
+            self.after_id = None
+
         self._mixer_check()
         pygame.mixer.music.stop()
         
         self.is_playing = True
         self.is_paused = False
-        self.checking = True 
-
-        self._play_track_at_index(self.current_index + 1, self.playback_id)
-
-    def reverse_track(self):
-        if not self.tracklist:
-            self.status_text.set("List is empty. Please add some tracks in.")
-            return
-        
-        if self.current_index <= 0:
-            self.status_text.set("You are at the beginning of the tracklist.")
-            return
-        
-        self.playback_id += 1
-        
-        if self.after_id:
-            self.window.after_cancel(self.after_id)
-            self.after_id = None
-        
-        self._mixer_check()
-        pygame.mixer.music.stop()
-
-        self.is_playing = True
-        self.is_paused = False 
         self.checking = True
 
-        self._play_track_at_index(self.current_index - 1, self.playback_id)
+        self._play_track_at_index(self.current_index - 2, self.playback_id)
+
 
 
     def pause_playback(self):
@@ -311,6 +332,7 @@ class CreateTracklist:
         self.checking = False
         self.current_index = 0
         self.playback_id += 1
+        self.tracklist_playing = False 
 
         if self.after_id:
             self.window.after_cancel(self.after_id)
@@ -361,7 +383,7 @@ class CreateTracklist:
     def _play_track_number(self, track_number):
         name = self.library.get_name(track_number)
         if name is None:
-            self.status_text.set("Track not found.")
+            self.status_text.set("Track not found in the library.")
             return
         
         self._mixer_check()
@@ -369,12 +391,12 @@ class CreateTracklist:
 
         if self.library.play_track(track_number):
             self.library.increment_play_count(track_number)
+            self.status_text.set(f"Played '{name}'.")
             self.is_playing = True
             self.is_paused = False
-            self.status_text.set(f"Played '{name}'.")
+            self.tracklist_playing = False
         else:
-            self.status_text.set("Error playing track, please try again.")
-    
+            self.status_text.set(f"Error playing '{name}'. Please try again.")
     
     def play_track(self):
         raw = self.track_input.get().strip()
@@ -412,6 +434,7 @@ class CreateTracklist:
             return
         track_number = self.tracklist[position - 1]
         self._play_track_number(track_number)
+
     def save_tracklist(self):
         try:
             with self.tracklist_file.open("w", newline="", encoding="utf-8") as file:
