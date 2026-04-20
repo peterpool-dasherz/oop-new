@@ -6,7 +6,7 @@ import track_library_oop as lib
 
 
 class TrackViewer:
-    def __init__(self, window, library = None, theme_mode = "System", on_play_track = None, on_add_to_tracklist = None):
+    def __init__(self, window, library = None, theme_mode = "System", on_play_track = None, on_add_to_tracklist = None, on_pause_track = None, on_resume_track = None, on_get_playback_state = None, on_toggle_loop_song = None):
         self.window = window
         self.window.title("View Tracks")
         self.window.geometry("1150x650")
@@ -20,6 +20,10 @@ class TrackViewer:
         self.theme_mode = theme_mode
         self.on_play_track = on_play_track
         self.on_add_to_tracklist = on_add_to_tracklist
+        self.on_pause_track = on_pause_track
+        self.on_resume_track = on_resume_track
+        self.on_get_playback_state = on_get_playback_state
+        self.on_toggle_loop_song = on_toggle_loop_song
 
         controls = ttk.Frame(self.window, padding = 10)
         controls.pack(fill = "x")
@@ -31,8 +35,11 @@ class TrackViewer:
         ttk.Label(top_row, text = "Track Number").pack(side = "left", padx = (12, 4))
         ttk.Entry(top_row, width = 8, textvariable = self.track_input).pack(side = "left", padx = (0, 8))
         ttk.Button(top_row, text = "View Track", command = self.view_tracks).pack(side = "left")
-        ttk.Button(top_row, text = "Play selected track", command = self.play_selected_track).pack(side = "left", padx = (0, 8))
+        ttk.Button(top_row, text = "Play selected track", command = self.toggle_play_pause).pack(side = "left", padx = (0, 8))
         ttk.Button(top_row, text = "Add to Tracklist", command = self.add_selected_to_tracklist).pack(side = "left")
+        ttk.Button(top_row, text = "Loop Song", command = self.toggle_loop_song).pack(side = "left", padx = (0, 8))
+
+        
 
         search_row = ttk.Frame(controls)
         search_row.pack(fill = "x")
@@ -161,21 +168,51 @@ class TrackViewer:
             return raw_track.zfill(2)
         return raw_track.upper()
     
-    def play_selected_track(self):
+    
+    def toggle_play_pause(self):
         track_number = self._get_track_number_from_input()
         if not track_number:
             self.status_text.set("Please enter a track number.")
             return
         
-        if self.on_play_track is None:
-            self.status_text.set("Error occurred, please try again.")
+        if self.on_play_track is None or self.on_pause_track is None or self.on_resume_track is None:
+            self.status_text.set("Error occurred. Please try again.")
             return
         
+        is_playing, is_paused = self.on_get_playback_state()
+
+        if is_paused:
+            if self.on_resume_track():
+                self.status_text.set("Playback resumed.")
+            else:
+                self.status_text.set("An error occurred, could not resume playback.")
+            return
+        
+        if is_playing:
+            if self.on_pause_track():
+                self.status_text.set("Playback paused.")
+            else:
+                self.status_text.set("An error occured, could not pause playback.")
+            return 
+        
         if self.on_play_track(track_number):
-            self.status_text.set(f"Played '{track_number}'.")
+            name = self.library.get_name(track_number)
+            self.status_text.set(f"Playing '{name}'.")
         else:
-            self.status_text.set("Error occurred, please try again.")
-    
+            self.status_text.set("Error occurred. Please try again.")
+
+    def toggle_loop_song(self):
+        if self.on_toggle_loop_song is None:
+            self.status_text.set("Error occurred. Please try again.")
+            return
+        
+        looping = self.on_toggle_loop_song()
+        if looping:
+            self.status_text.set("Song loop enabled.")
+        else:
+            self.status_text.set("Song loop disabled.")
+        
+
     def add_selected_to_tracklist(self):
         track_number = self._get_track_number_from_input()
         if not track_number:

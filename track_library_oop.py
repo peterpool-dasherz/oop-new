@@ -187,7 +187,7 @@ class TrackLibrary:
             pygame.mixer.init()
         return True
 
-    def play_track(self, track_number):
+    def play_track(self, track_number, loop = False):
         audio_path = self.get_audio_path(track_number)
         if audio_path is None or not audio_path.exists():
             return False
@@ -195,12 +195,27 @@ class TrackLibrary:
             return False
         pygame.mixer.music.stop()
         pygame.mixer.music.load(str(audio_path))
-        pygame.mixer.music.play()
+        pygame.mixer.music.play(loops = -1 if loop else 0)
         return True
 
     def stop_track(self):
         if pygame is not None and pygame.mixer.get_init():
             pygame.mixer.music.stop()
+
+    def pause_track(self):
+        if pygame is not None and pygame.mixer.get_init():
+            pygame.mixer.music.pause()
+            return True
+        return False
+    
+    def resume_track(self):
+        if pygame is not None and pygame.mixer.get_init():
+            pygame.mixer.music.unpause()
+            return True
+        return False
+    
+
+
 
     def save_lib_state(self, csv_path):
         path = Path(csv_path)

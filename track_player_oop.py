@@ -37,6 +37,9 @@ class TrackPlayer:
         self.theme_mode = font.load_theme_mode(self.settings_file)
         font.set_theme_mode(self.theme_mode)
 
+        self.is_playing = False
+        self.is_paused = False 
+
         if self.theme_mode == "System":
             font.apply_device_theme(self.window)
         else:
@@ -44,6 +47,8 @@ class TrackPlayer:
 
         self.logout_callback = None
         self.create_tracklist_app = None
+        
+        self.song_loop = False 
 
         container = ttk.Frame(window, padding = 16)
         container.pack(fill = "both", expand = True)
@@ -84,7 +89,7 @@ class TrackPlayer:
             self.logout_callback()
     
     def open_view_tracks_oop(self):
-        TrackViewer(tk.Toplevel(self.window), self.library, theme_mode = self.theme_mode, on_play_track = self.play_track_now, on_add_to_tracklist = self.add_track_to_tracklist)
+        TrackViewer(tk.Toplevel(self.window), self.library, theme_mode = self.theme_mode, on_play_track = self.play_track_now, on_add_to_tracklist = self.add_track_to_tracklist, on_pause_track = self.pause_track_now, on_resume_track = self.resume_track_now, on_get_playback_state = self.get_playback_state, on_toggle_loop_song = self.toggle_loop_song)
     def open_create_tracklist(self):
         self.create_tracklist_app = CreateTracklist(tk.Toplevel(self.window), self.library, theme_mode = self.theme_mode)
     def open_update_tracks(self):
@@ -104,6 +109,9 @@ class TrackPlayer:
         else:
             font.apply_theme(self.window, mode)
     
+    def get_playback_state(self):
+        return self.is_playing, self.is_paused
+    
     def play_track_now(self, track_number):
         if not track_number:
             return False
@@ -116,14 +124,41 @@ class TrackPlayer:
         if self.library.get_name(track_number) is None:
             return False
         
-        self.library.stop_track()
-        played = self.library.play_track(track_number)
+        played = self.library.play_track(track_number, loop = self.song_loop)
         if played:
             self.library.increment_play_count(track_number)
             self.tracklist_playing = False
             self.is_playing = True
             self.is_paused = False
-        return played 
+        return played
+    
+
+    
+    def pause_track_now(self):
+        if not self.is_playing:
+            return False
+        
+        if self.library.pause_track():
+            self.is_playing = False
+            self.is_paused = True
+            return True
+        return False
+    
+
+    def resume_track_now(self):
+        if not self.is_paused:
+            return False
+        
+        if self.library.resume_track():
+            self.is_playing = True
+            self.is_pause = False
+            return True
+        return False
+    
+    def toggle_song_loop(self):
+        self.song_loop = not self.song_loop
+        return self.song_loop
+    
     
 
     
