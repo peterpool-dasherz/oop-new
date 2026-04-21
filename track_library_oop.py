@@ -201,6 +201,10 @@ class TrackLibrary:
     def stop_track(self):
         if pygame is not None and pygame.mixer.get_init():
             pygame.mixer.music.stop()
+    
+    
+    
+
 
     def pause_track(self):
         if pygame is not None and pygame.mixer.get_init():

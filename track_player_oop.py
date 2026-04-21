@@ -38,7 +38,9 @@ class TrackPlayer:
         font.set_theme_mode(self.theme_mode)
 
         self.is_playing = False
-        self.is_paused = False 
+        self.is_paused = False
+
+        self.song_loop = False 
 
         if self.theme_mode == "System":
             font.apply_device_theme(self.window)
@@ -132,6 +134,8 @@ class TrackPlayer:
             self.is_paused = False
         return played
     
+    
+    
 
     
     def pause_track_now(self):
@@ -188,6 +192,10 @@ class TrackPlayer:
         self.create_tracklist_app._refresh_tracklist_text()
         self.create_tracklist_app.save_tracklist()
         return True
+    
+    def toggle_loop_song(self):
+        self.song_loop = not self.song_loop
+        return self.song_loop
     
         
         
