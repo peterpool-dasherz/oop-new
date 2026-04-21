@@ -196,8 +196,8 @@ class CreateTracklist:
             self.play_stop_button.configure(text = "Stop Tracklist")
         if getattr(self, "pause_resume_button", None) is not None:
             self.pause_resume_button.configure(text = "Pause")
-
-        self._play_next_in_tracklist(self.playback_id)
+        
+        self._play_next_in_tracklist(self.playback_id) 
 
 
     def toggle_play_stop(self):
@@ -243,24 +243,31 @@ class CreateTracklist:
         while 0 <= next_index < len(self.tracklist):
             track_number = self.tracklist[next_index]
             name = self.library.get_name(track_number) or "Unknown"
+            looping = next_index in self.looped_positions
 
-            if self.library.play_track(track_number):
+            if self.library.play_track(track_number, loop = looping):
                 self.library.increment_play_count(track_number)
                 self.current_index = next_index
                 self.status_text.set(f"Played '{name}'.")
-                self.after_id = self.window.after(1000, lambda: self._check_track_end(playback_id))
+
+                if not looping:
+                    self.after_id = self.window.after(1000, lambda: self._check_track_end(playback_id))
                 return
+            
             self.current_index = next_index
-            self.status_text.set(f"Error playing '{name}', skipping in the current direction.")
+            self.status_text.set(f"Error playing '{name}', skipping to next track.")
             next_index += self.tracklist_step 
         
         if self.tracklist_loop and self.tracklist:
-            self.current_index = -1 if self.tracklist_step > 0 else len(self.tracklist)
+            if self.tracklist_step > 0:
+                self.current_index = -1
+            else:
+                self.current_index = len(self.tracklist)
+            
             self._play_next_in_tracklist(playback_id)
             return
         
-
-        
+                
         self.is_playing = False
         self.is_paused = False
         self.checking = False
@@ -280,7 +287,7 @@ class CreateTracklist:
 
 
     def _play_track_at_index(self, index, playback_id = None):
-        if index < 0 or index == len(self.tracklist):
+        if index < 0 or index >= len(self.tracklist):
             self.status_text.set("Error playing track. Please try again.")
             return
         
@@ -290,25 +297,50 @@ class CreateTracklist:
         track_number = self.tracklist[index]
         name = self.library.get_name(track_number) or "Unknown"
 
-        if self.library.play_track(track_number):
+        looping = index in self.looped_positions
+
+        if self.library.play_track(track_number, loop = looping):
             self.library.increment_play_count(track_number)
             self.status_text.set(f"Played '{name}'.")
         else:
-            self.status_text.set(f"Error playing '{name}'. Skipping to next track.")
+            self.status_text.set(f"Error playing '{name}', skipping to next track.")
         
-        self.current_index = index + 1
-        self.after_id = self.window.after(1000, lambda: self._check_track_end(playback_id))
+        self.current_index = index
+        if not looping:
+            self.after_id = self.window.after(1000, lambda: self._check_track_end(playback_id))
 
     def skip_track(self):
         if not self.tracklist_playing:
-            self.status_text.set("Playback is not available, please try again.")
+            self.status_text.set("Error occurred, please try again.")
+            return
+        
+        if not self.tracklist:
+            self.status_text.set("List is empty. Please add some tracks in.")
             return
         
         next_index = self.current_index + self.tracklist_step
 
         if next_index < 0 or next_index >= len(self.tracklist):
             if self.tracklist_step > 0:
-                self.status_text.set("You are alread")
+                self.status_text.set("You are already at end of the tracklist.")
+            else:
+                self.status_text.set("You are at the beginning of the tracklist.")
+            return
+        
+        self.playback_id += 1
+
+        if self.after_id:
+            self.window.after_cancel(self.after_id)
+            self.after_id = None
+        
+        self._mixer_check()
+        pygame.mixer.music.stop()
+
+        self.is_playing = True
+        self.is_paused = False
+        self.checking = True
+
+        self._play_track_at_index(next_index, self.playback_id)
 
     def reverse_track(self):
         if not self.tracklist_playing:
@@ -319,7 +351,9 @@ class CreateTracklist:
             self.status_text.set("List is empty. Please add some tracks in.")
             return
         
-        if self.current_index <= 1:
+        previous_index = self.current_index - 1
+
+        if previous_index < 0:
             self.status_text.set("You are at the beginning of the tracklist.")
             return
         
@@ -328,18 +362,16 @@ class CreateTracklist:
         if self.after_id:
             self.window.after_cancel(self.after_id)
             self.after_id = None
-
+        
         self._mixer_check()
         pygame.mixer.music.stop()
-        
-        self.current_index = len(self.tracklist)
+
+        self.tracklist_step = -1
         self.is_playing = True
         self.is_paused = False
         self.checking = True
-        self.tracklist_step = -1
 
-        self._play_track_at_index(self.current_index - 2, self.playback_id)
-
+        self._play_track_at_index(previous_index, self.playback_id)
 
 
     def pause_playback(self):
@@ -376,18 +408,17 @@ class CreateTracklist:
         self.checking = False
         self.current_index = 0
         self.playback_id += 1
-        self.tracklist_playing = False 
+        self.tracklist_playing = False
 
         if self.after_id:
             self.window.after_cancel(self.after_id)
-            self.after_id = None 
+            self.after_id = None
         
         self._mixer_check()
         pygame.mixer.music.stop()
         self.status_text.set("Playback stopped.")
 
-        self._reset_playback_buttons()
-
+        self._reset_playback_buttons() 
         
     
     def _stop_single_track(self):
@@ -398,6 +429,7 @@ class CreateTracklist:
     def _check_track_end(self, playback_id = None):
         if playback_id is None:
             playback_id = self.playback_id
+        
         if playback_id != self.playback_id or not self.is_playing:
             return
         
@@ -405,15 +437,15 @@ class CreateTracklist:
             self.after_id = self.window.after(1000, lambda: self._check_track_end(playback_id))
             return
         
-        if pygame.mixer.get_busy():
+        if self.current_index in self.looped_positions:
+            return
+        
+        if pygame.mixer.music.get_busy():
             self.after_id = self.window.after(1000, lambda: self._check_track_end(playback_id))
             return
         
-        if self.current_index in self.looped_positions:
-            self._play_track_at_index(self.current_index, playback_id)
-            return
-        
         self._play_next_in_tracklist(playback_id)
+
 
     def _mixer_check(self):
         if pygame.mixer.get_init() is None:
