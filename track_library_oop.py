@@ -203,7 +203,6 @@ class TrackLibrary:
             pygame.mixer.music.stop()
     
     
-    
 
 
     def pause_track(self):
@@ -218,6 +217,19 @@ class TrackLibrary:
             return True
         return False
     
+    def get_track_length(self, track_number: str):
+        audio_path = self.get_audio_path(track_number)
+        if audio_path is None or not audio_path.exists():
+            return 0.0
+        
+        try:
+            if pygame is None:
+                return 0.0
+            return pygame.mixer.Sound(str(audio_path)).get_length()
+        except Exception:
+            return 0.0
+        
+        
 
 
 

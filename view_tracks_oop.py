@@ -3,6 +3,7 @@ from tkinter import ttk
 from pathlib import Path
 import font_manager as font
 import track_library_oop as lib
+import pygame
 
 
 class TrackViewer:
@@ -24,6 +25,10 @@ class TrackViewer:
         self.on_resume_track = on_resume_track
         self.on_get_playback_state = on_get_playback_state
         self.on_toggle_loop_song = on_toggle_loop_song
+        self.current_track_number = None
+        self.progress_after_id = None
+        self.progress_value = None
+        self.progress_text = tk.StringVar(value = "00:00 / 00:00")
 
         controls = ttk.Frame(self.window, padding = 10)
         controls.pack(fill = "x")
@@ -78,10 +83,20 @@ class TrackViewer:
         status_bar.pack(fill = "x")
         self.refresh_artist_options()
 
+        progress_frame = ttk.Frame(self.window, padding = (10, 0, 10, 0))
+        progress_frame.pack(fill = "x")
+
+        self.progress_bar = ttk.Progressbar(progress_frame, orient = "horizontal", mode = "determinate", maximum = 100, variable = self.progress_value)
+        ttk.Label(progress_frame, textvariable = self.progress_text).pack(anchor = "e")
+
+
         if self.theme_mode == "System":
             font.apply_device_theme(self.window)
         else:
             font.apply_theme(self.window, self.theme_mode)
+
+        self._update_progress_bar()
+        
 
     def set_text(self, text_area, content):
         text_area.configure(state = "normal")
@@ -168,6 +183,44 @@ class TrackViewer:
             return raw_track.zfill(2)
         return raw_track.upper()
     
+    def _format_time(self, seconds):
+        seconds = max(0, int(seconds))
+        return f"{seconds // 60:02d} : {seconds % 60:02d}"
+    
+    def _update_progress_bar(self):
+        if self.current_track_number is None or self.on_get_playback_state is None:
+            self.progress_value.set(0)
+            self.progress_text.set("00:00 / 00:00")
+            self.progress_after_id = self.window.after(200, self._update_progress_bar)
+            return
+        
+        is_playing, is_paused = self.on_get_playback_state
+        total = self.library.get_track_length(self.current_track_number)
+
+        if not is_playing or is_paused:
+            self.progress_value.set(0)
+            self.progress_text.set("00:00 / 00:00")
+            self.progress_after_id = self.window.after(200, self._update_progress_bar)
+            return
+        
+        if total <= 0:
+            self.progress_value.set(0)
+            self.progress_text.set("00:00 / 00:00")
+            self.progress_after_id = self.window.after(200, self._update_progress_bar)
+
+        pos_ms = pygame.mixer.music.get_pos()
+        if pos_ms < 0:
+            elapsed = 0
+        else:
+            elapsed = min(pos_ms / 1000.0, total)
+        percent = (elapsed / total ) * 100
+
+        self.progress_value.set(percent)
+        self.progress_text.set(f"{self._format_time(elapsed)} / {self._format_time(total)}")
+        self.progress_after_id = self.window.after(200, self._update_progress_bar)
+
+
+    
     
     def toggle_play_pause(self):
         track_number = self._get_track_number_from_input()
@@ -175,29 +228,30 @@ class TrackViewer:
             self.status_text.set("Please enter a track number.")
             return
         
-        if self.on_play_track is None or self.on_pause_track is None or self.on_resume_track is None:
+        if self.on_play_track is None or self.on_pause_track is None or self.on_resume_track is None or self.on_get_playback_state is None:
             self.status_text.set("Error occurred. Please try again.")
             return
         
         is_playing, is_paused = self.on_get_playback_state()
-
         if is_paused:
             if self.on_resume_track():
-                self.status_text.set("Playback resumed.")
+                name = self.library.get_name(track_number) or track_number 
+                self.status_text.set(f"Playback resumed for {name}.")
             else:
-                self.status_text.set("An error occurred, could not resume playback.")
+                self.status_text.set("Error occurred. Please try again.")
             return
         
         if is_playing:
             if self.on_pause_track():
-                self.status_text.set("Playback paused.")
+                name = self.library.get_name(track_number) or track_number 
+                self.status_text.set(f"Playback paused for {name}.")
             else:
-                self.status_text.set("An error occured, could not pause playback.")
-            return 
+                self.status_text.set("Error occurred. Please try again.")
+            return
         
         if self.on_play_track(track_number):
-            name = self.library.get_name(track_number)
-            self.status_text.set(f"Playing '{name}'.")
+            name = self.library.get_name(track_number) or track_number
+            self.status_text.set(f"Played '{name}'.")
         else:
             self.status_text.set("Error occurred. Please try again.")
 

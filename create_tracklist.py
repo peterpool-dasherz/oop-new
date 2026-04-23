@@ -40,6 +40,9 @@ class CreateTracklist:
 
         self.playback_mode = None
         self.current_track_number = None
+        self.progress_after_id = None
+        self.progress_value = tk.DoubleVar(value = 0)
+        self.progress_text = tk.StringVar(value = "00:00 / 00:00")
         
 
         controls = ttk.Frame(window, padding = 10)
@@ -109,6 +112,15 @@ class CreateTracklist:
         self.loop_track_number_button = ttk.Button(playback_frame, text = "Loop Track Number", command = self.toggle_selected_track_number_loop)
         self.loop_track_number_button.grid(row = 0, column = 6, padx = 4)
 
+        progress_frame = ttk.Frame(window, padding = (10, 0, 10, 0))
+        progress_frame.pack(fill = "x")
+
+        self.progress_bar = ttk.Progressbar(progress_frame, orient = "horizontal", mode = "determinate", maximum = 100, variable = self.progress_value)
+        self.progress_bar.pack(fill = "x")
+        ttk.Label(progress_frame, textvariable = self.progress_text).pack(anchor = "e")
+
+
+
 
 
         ttk.Label(bottom_bar, textvariable = self.status_text, padding = (10, 8)).pack(fill = "x")
@@ -117,6 +129,8 @@ class CreateTracklist:
             font.apply_device_theme(self.window)
         else:
             font.apply_theme(self.window, self.theme_mode)
+        
+        self._update_progress_bar()
         
     def set_text(self, text_area, content):
         text_area.configure(state = "normal")
@@ -134,6 +148,44 @@ class CreateTracklist:
             else:
                 lines.append(f"{index + 1}. {name} ({track_number})")
         return "\n".join(lines)
+    
+    def _format_time(self, seconds):
+        seconds = max(0, int(seconds))
+        return f"{seconds // 60:02d}:{seconds % 60:02d}"
+    
+    def _update_progress_bar(self):
+        if self.current_track_number is None:
+            self.progress_value.set(0)
+            self.progress_text.set("00:00 / 00:00")
+            self.progress_after_id = self.window.after(200, self._update_progress_bar)
+            return
+        
+        total = self.library.get_track_length(self.current_track_number)
+
+        if total <= 0:
+            self.progress_value.set(0)
+            self.progress_text.set("00:00 / 00:00")
+            self.progress_after_id = self.window.after(200, self._update_progress_bar)
+            return
+        
+        if not self.is_playing or not self.is_paused:
+            self.progress_value.set(0)
+            self.progress_text.set("00:00 / 00:00")
+            self.progress_after_id = self.window.after(200, self._update_progress_bar)
+            return
+        
+        pos_ms = pygame.mixer.music.get_pos()
+        if pos_ms < 0:
+            elapsed = 0
+        else:
+            elapsed = min(pos_ms / 1000.0, total)
+        percent = (elapsed / total) * 100
+
+        self.progress_value.set(percent)
+        self.progress_text.set(f"{self._format_time(elapsed)} / {self._format_time(total)}")
+        self.progress_after_id = self.window.after(200, self._update_progress_bar)
+
+
 
     def _refresh_tracklist_text(self):
         self.set_text(self.tracklist_text, self._format_tracklist())
@@ -272,7 +324,7 @@ class CreateTracklist:
         
         next_index = self.current_index + self.tracklist_step 
 
-        if self.tracklist_loop and self.tracklist:
+        if self.tracklist and self.tracklist_loop:
             next_index = self._wrap_tracklist_index
         else:
             if next_index < 0 or next_index >= len(self.tracklist):
@@ -284,36 +336,38 @@ class CreateTracklist:
                 self.status_text.set("Played all tracks in tracklist.")
                 return
             
-            while 0 <= next_index < len(self.tracklist):
-                track_number = self.tracklist[next_index]
-                name = self.library.get_name(track_number) or "Unknown"
-                looping = self._is_looped_track(next_index)
+        while 0 < next_index < len(self.tracklist):
+            track_number = self.tracklist[next_index]
+            name = self.library.get_name(track_number) or "Unknown"
+            looping = self._is_looped_track(next_index)
 
-                if self.library.play_track(track_number, loop = looping):
-                    self.library.increment_play_count(track_number)
-                    self.current_index = next_index
-                    self.current_track_number = track_number 
-                    self.playback_mode = "tracklist"
-                    self.status_text.set(f"Played '{name}'.")
+            if self.library.play_track(track_number, loop = looping):
+                self.library.increment_play_count(track_number)
+                self.status_text.set(f"Played '{name}'.")
+                self.current_index = next_index
+                self.current_track_number = track_number 
+                self.playback_mode = "tracklist"
 
                 if not looping:
                     self.after_id = self.window.after(1000, lambda: self._check_track_end(playback_id))
-                    return
+                return
+            
+            self.current_index = next_index
+            self.current_track_number = track_number 
+            self.status_text.set(f"Error playing '{name}', skipping to next track.")
+            next_index += self.tracklist_step 
 
-                self.current_index = next_index 
-                self.current_track_number = track_number 
-                self.status_text.set(f"Error playing '{name}', skipping to next track.")
-                next_index += self.tracklist_step
+            if self.tracklist and self.tracklist_loop:
+                next_index = self._wrap_tracklist_index(next_index)
+            
+        self.is_playing = False
+        self.is_paused = False
+        self.checking = False
+        self.tracklist_playing = False
+        self._reset_playback_buttons()
+        self.status_text.set("Played all tracks in tracklist.")
 
-                if self.tracklist_loop and self.tracklist:
-                    next_index = self._wrap_tracklist_index(next_index)
 
-            self.is_playing = False
-            self.is_paused = False
-            self.checking = False
-            self.tracklist_playing = False
-            self._reset_playback_buttons()
-            self.status_text.set("Played all tracks in tracklist.")
 
 
 
@@ -332,24 +386,26 @@ class CreateTracklist:
         return index % len(self.tracklist)
     
     def _restart_active_track(self):
-        if self.playback_mode == "single" and self.current_track_number is not None:
-            self.playback_id += 1
-            self._stop_current_playback()
-            self.is_playing = True
-            self.is_paused = False
-            self.checking = True
-            self._play_track_number(self.current_track_number)
-            return True
+        if self.current_index < 0 or self.current_index >= len(self.tracklist):
+            return False
         
-        if self.playback_mode == "tracklist" and 0 <= self.current_index < len(self.tracklist):
-            self.playback_id += 1
-            self._stop_current_playback()
-            self.is_playing = True
-            self.is_paused = False
-            self.checking = True
-            self._play_track_at_index(self.current_index, self.playback_id)
-            return True
-        return False
+        if not self._is_looped_track(self.current_index):
+            return False
+        
+        track_number = self.library[self.current_index]
+        name = self.library.get_name(track_number) or "Unknown"
+
+        self.playback_id += 1
+        self._stop_current_playback()
+        self.is_playing = True
+        self.is_paused = False
+        self.checking = True
+
+        self._play_track_at_index(self.current_index, self.playback_id)
+        self.status_text.set(f"Restarted looped track: {name}")
+        return True
+    
+
     
     def _is_looped_track(self, index):
         if index < 0 or index >= len(self.tracklist):
@@ -373,7 +429,7 @@ class CreateTracklist:
 
     def _play_track_at_index(self, index, playback_id = None):
         if index < 0 or index >= len(self.tracklist):
-            self.status_text.set("Error occurred, please try again.")
+            self.status_text.set("Error occurred. Please try again.")
             return
         
         if playback_id is None:
@@ -387,76 +443,86 @@ class CreateTracklist:
             self.library.increment_play_count(track_number)
             self.status_text.set(f"Played '{name}'.")
         else:
-            self.status_text.set(f"Error playing '{name}', skipping to next track.")
+            self.status_text.set(f"Error playing '{name}', please try again.")
 
         self.current_index = index
+        self.current_track_number = track_number 
+        self.playback_mode = "tracklist"
 
         if not looping:
             self.after_id = self.window.after(1000, lambda: self._check_track_end(playback_id))
 
+            
 
 
     def skip_track(self):
-        if not self.tracklist_playing:
+        if not self.tracklist_playing and self.playback_mode != "single":
             self.status_text.set("Nothing is currently playing.")
             return
         
-        if not self.tracklist:
-            self.status_text.set("List is empty. Please add some tracks in.")
-            return
-        
-        if self._is_looped_track(self.current_index):
-            track_number = self.tracklist[self.current_index]
-            name = self.library.get_name(track_number) or "Unknown"
-
+        if self.playback_mode == "single":
+            if self.current_track_number is None:
+                self.status_text.set("Nothing is currently playing.")
+                return
+            
             self.playback_id += 1
             self._stop_current_playback()
             self.is_playing = True
             self.is_paused = False
             self.checking = True
-            self._play_track_at_index(self.current_index, self.playback_id)
-            self.status_text.set(f"Restarted looped track '{name}'.")
+            self._play_track_number(self.current_track_number)
+            self.status_text.set("Restarted current track.")
+            return
+        
+        if self._restart_active_track():
             return
         
         next_index = self.current_index + 1
-        
+
         if self.tracklist_loop:
             next_index = self._wrap_tracklist_index(next_index)
         elif next_index >= len(self.tracklist):
-            self.status_text.set("You are already at the end of the tracklist.")
+            self.status_text.set("You are at the end of the tracklist.")
             return
         
         self.playback_id += 1
-        self._stop_current_playback()
+        self.stop_current_playback()
         self.is_playing = True
         self.is_paused = False
         self.checking = True
 
         self._play_track_at_index(next_index, self.playback_id)
 
+        
+            
+
 
 
 
     def reverse_track(self):
-        if not self.tracklist_playing:
+        if not self.tracklist_playing and self.playback_mode != "single":
             self.status_text.set("Nothing is currently playing.")
+            return
+        
+        if self.playback_mode == "single":
+            if self.current_track_number is None:
+                self.status_text.set("Nothing is currently playing.")
+                return
+            
+            self.playback_id += 1
+            self._stop_current_playback()
+            self.is_playing = True
+            self.is_paused = False
+            self.checking = True
+            self._play_track_number(self.current_track_number)
+            self.status_text.set("Restarted current track.")
             return
         
         if not self.tracklist:
             self.status_text.set("List is empty. Please add some tracks in.")
             return
         
-        if self._is_looped_track(self.current_index):
-            track_number = self.tracklist[self.current_index]
-            name = self.library.get_name(track_number) or "Unknown"
-
-            self.playback_id += 1
-            self._stop_current_playback()
-            self.is_playing = True
-            self.is_paused = False
-            self.checking = True
-            self._play_track_at_index(self.current_index, self.playback_id)
-            self.status_text.set(f"Restarted loop track '{name}'.")
+        if self._restart_active_track():
             return
         
         previous_index = self.current_index - 1
@@ -483,20 +549,29 @@ class CreateTracklist:
         self._mixer_check()
 
         if not self.is_paused:
-            self.status_text.set("Playback is currently active")
+            self.status_text.set("Playback is active.")
             return
         
         pygame.mixer.music.unpause()
         self.is_playing = True
         self.is_paused = False
+        self.checking = True
         self.status_text.set("Playback resumed.")
-        self.after_id = self.window.after(1000, self._check_track_end)
+
+        if self.after_id:
+            self.window.after_cancel(self.after_id)
+            self.after_id = None
+
+        if self.playback_mode == "tracklist":
+            self.after_id = self.window.after(1000, lambda: self._check_track_end(self.playback_id))
+
 
     def stop_playback(self):
         self.is_playing = False
         self.is_paused = False
         self.checking = False
         self.current_index = 0
+        self.current_track_number = None
         self.playback_id += 1
         self.tracklist_playing = False
 
@@ -504,11 +579,17 @@ class CreateTracklist:
             self.window.after_cancel(self.after_id)
             self.after_id = None
         
+        if self.progress_after_id:
+            self.window.after_cancel(self.progress_after_id)
+            self.progress_after_id = None
+
         self._mixer_check()
         pygame.mixer.music.stop()
         self.status_text.set("Playback stopped.")
 
-        self._reset_playback_buttons() 
+        self.progress_value.set(0)
+        self.progress_text.set("00:00 / 00:00")
+        self._reset_playback_buttons()
         
     def _stop_current_playback(self):
         if self.after_id:
@@ -534,14 +615,15 @@ class CreateTracklist:
             self.after_id = self.window.after(1000, lambda: self._check_track_end(playback_id))
             return
         
-        if self.current_index in self.looped_positions:
+        if self.current_track_number is None:
             return
         
         if pygame.mixer.music.get_busy():
             self.after_id = self.window.after(1000, lambda: self._check_track_end(playback_id))
             return
         
-        self._play_next_in_tracklist(playback_id)
+        if self.playback_mode == "tracklist":
+            self._play_next_in_tracklist(playback_id)
 
 
     def _mixer_check(self):
@@ -559,7 +641,7 @@ class CreateTracklist:
     def _play_track_number(self, track_number):
         name = self.library.get_name(track_number)
         if name is None:
-            self.status_text.set("Track not found.")
+            self.status_text.set("Please enter a track number.")
             return
         
         self._mixer_check()
@@ -571,13 +653,12 @@ class CreateTracklist:
             self.is_playing = True
             self.is_paused = False
             self.checking = True
-            self.tracklist_playing = False
             self.playback_mode = "single"
             self.current_track_number = track_number
-            self.current_index = -1
+            self.current_index += 1
+            self.tracklist_playing = False
         else:
-            self.status_text.set(f"Error playing {name}. Please try again.")
-
+            self.status_text.set(f"Error playing '{name}', please try again.")
 
     def play_track(self):
         raw = self.track_input.get().strip()
