@@ -227,9 +227,7 @@ class TrackLibrary:
                 return 0.0
             return pygame.mixer.Sound(str(audio_path)).get_length()
         except Exception:
-            return 0.0
-        
-        
+            return 0.0   
 
 
 

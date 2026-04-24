@@ -7,7 +7,7 @@ import pygame
 
 
 class TrackViewer:
-    def __init__(self, window, library = None, theme_mode = "System", on_play_track = None, on_add_to_tracklist = None, on_pause_track = None, on_resume_track = None, on_get_playback_state = None, on_toggle_loop_song = None):
+    def __init__(self, window, library = None, theme_mode = "System", on_play_track = None, on_add_to_tracklist = None, on_pause_track = None, on_resume_track = None, on_get_playback_state = None, on_toggle_loop_song = None, on_stop_track = None):
         self.window = window
         self.window.title("View Tracks")
         self.window.geometry("1150x650")
@@ -23,9 +23,11 @@ class TrackViewer:
         self.on_add_to_tracklist = on_add_to_tracklist
         self.on_pause_track = on_pause_track
         self.on_resume_track = on_resume_track
+        self.on_stop_track = on_stop_track
         self.on_get_playback_state = on_get_playback_state
         self.on_toggle_loop_song = on_toggle_loop_song
         self.current_track_number = None
+        self.current_track_length = 0.0
         self.progress_after_id = None
         self.progress_value = None
         self.progress_text = tk.StringVar(value = "00:00 / 00:00")
@@ -43,7 +45,8 @@ class TrackViewer:
         ttk.Button(top_row, text = "Play selected track", command = self.toggle_play_pause).pack(side = "left", padx = (0, 8))
         ttk.Button(top_row, text = "Add to Tracklist", command = self.add_selected_to_tracklist).pack(side = "left")
         ttk.Button(top_row, text = "Loop Song", command = self.toggle_loop_song).pack(side = "left", padx = (0, 8))
-
+        ttk.Button(top_row, text = "Stop", command = self.stop_playback).pack(side = "left", padx= (0, 8))
+    
         
 
         search_row = ttk.Frame(controls)
@@ -173,6 +176,10 @@ class TrackViewer:
         self.track_input.set("")
         self.search_input.set("")
         self.artists_filter_input.set("All artists")
+        self.current_track_number = None
+        self.current_track_length = 0.0
+        self.progress_value.set(0)
+        self.progress_text.set("00:00 / 00:00")
         self.status_text.set("All fields cleared")
     
     def _get_track_number_from_input(self):
@@ -188,36 +195,54 @@ class TrackViewer:
         return f"{seconds // 60:02d} : {seconds % 60:02d}"
     
     def _update_progress_bar(self):
-        if self.current_track_number is None or self.on_get_playback_state is None:
+        try:
+            if self.current_track_number is None or self.current_track_length <= 0:
+                self.progress_value.set(0)
+                self.progress_text.set("00:00 / 00:00")
+            elif self.on_get_playback_state is not None:
+                is_playing, is_paused = self.on_get_playback_state()
+                if is_playing or is_paused:
+                    pos_ms = pygame.mixer.music.get_pos()
+                    
+                    if pos_ms < 0:
+                        elapsed = 0
+                    else:
+                        elapsed = min(elapsed / 100.0, self.current_track_length)
+                    percent = (elapsed / self.current_track_length) * 100
+
+                    self.progress_value.set(percent)
+                    self.progress_text.set(f"{self._format_time(elapsed)} / {self._format_time(self.current_track_length)}")
+            
+                else:
+                    self.progress_value.set(0)
+                    self.progress_text.set("00:00 / 00:00")
+                
+            else:
+                self.progress_value.set(0)
+                self.progress_text.set("00:00 / 00:00")
+        
+        except Exception:
             self.progress_value.set(0)
             self.progress_text.set("00:00 / 00:00")
-            self.progress_after_id = self.window.after(200, self._update_progress_bar)
+
+        self.progress_after_id = self.window.after(250, self._update_progress_bar)
+
+    
+    def stop_playback(self):
+        if self.on_stop_track is None:
+            self.status_text.set("Error occurred. Please try again.")
             return
         
-        is_playing, is_paused = self.on_get_playback_state
-        total = self.library.get_track_length(self.current_track_number)
-
-        if not is_playing or is_paused:
+        if self.on_stop_track():
+            self.current_track_number = None
+            self.current_track_length = 0.0
             self.progress_value.set(0)
             self.progress_text.set("00:00 / 00:00")
-            self.progress_after_id = self.window.after(200, self._update_progress_bar)
-            return
+            self.status_text.set("Playback stopped.")
         
-        if total <= 0:
-            self.progress_value.set(0)
-            self.progress_text.set("00:00 / 00:00")
-            self.progress_after_id = self.window.after(200, self._update_progress_bar)
-
-        pos_ms = pygame.mixer.music.get_pos()
-        if pos_ms < 0:
-            elapsed = 0
         else:
-            elapsed = min(pos_ms / 1000.0, total)
-        percent = (elapsed / total ) * 100
+            self.status_text.set("Error occurred. Please try again.")
 
-        self.progress_value.set(percent)
-        self.progress_text.set(f"{self._format_time(elapsed)} / {self._format_time(total)}")
-        self.progress_after_id = self.window.after(200, self._update_progress_bar)
 
 
     
@@ -251,9 +276,12 @@ class TrackViewer:
         
         if self.on_play_track(track_number):
             name = self.library.get_name(track_number) or track_number
-            self.status_text.set(f"Played '{name}'.")
+            self.current_track_number = track_number
+            self.current_track_length = self.library.get_track_length(track_number)
+            self.status_text.set(f"Playing '{name}'.")
         else:
-            self.status_text.set("Error occurred. Please try again.")
+            self.status_text.set(f"Error playing '{name}'. Please try again.")
+    
 
     def toggle_loop_song(self):
         if self.on_toggle_loop_song is None:

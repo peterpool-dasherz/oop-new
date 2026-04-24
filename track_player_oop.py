@@ -91,7 +91,7 @@ class TrackPlayer:
             self.logout_callback()
     
     def open_view_tracks_oop(self):
-        TrackViewer(tk.Toplevel(self.window), self.library, theme_mode = self.theme_mode, on_play_track = self.play_track_now, on_add_to_tracklist = self.add_track_to_tracklist, on_pause_track = self.pause_track_now, on_resume_track = self.resume_track_now, on_get_playback_state = self.get_playback_state, on_toggle_loop_song = self.toggle_loop_song)
+        TrackViewer(tk.Toplevel(self.window), self.library, theme_mode = self.theme_mode, on_play_track = self.play_track_now, on_add_to_tracklist = self.add_track_to_tracklist, on_pause_track = self.pause_track_now, on_resume_track = self.resume_track_now, on_get_playback_state = self.get_playback_state, on_toggle_loop_song = self.toggle_loop_song, on_stop_track = self.stop_current_track)
     def open_create_tracklist(self):
         self.create_tracklist_app = CreateTracklist(tk.Toplevel(self.window), self.library, theme_mode = self.theme_mode)
     def open_update_tracks(self):
@@ -134,7 +134,17 @@ class TrackPlayer:
             self.is_paused = False
         return played
     
+    def stop_current_track(self):
+        self.library.stop_track()
+        self.is_playing = True
+        self.is_paused = False
+        self.tracklist_playing = False
+        self.playback_mode = None
+        self.current_track_number = None
+        self.current_index = -1
+        return True
     
+
     
 
     
