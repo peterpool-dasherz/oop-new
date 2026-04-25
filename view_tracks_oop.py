@@ -29,7 +29,7 @@ class TrackViewer:
         self.current_track_number = None
         self.current_track_length = 0.0
         self.progress_after_id = None
-        self.progress_value = None
+        self.progress_value = tk.DoubleVar(value = 0)
         self.progress_text = tk.StringVar(value = "00:00 / 00:00")
 
         controls = ttk.Frame(self.window, padding = 10)
@@ -90,6 +90,7 @@ class TrackViewer:
         progress_frame.pack(fill = "x")
 
         self.progress_bar = ttk.Progressbar(progress_frame, orient = "horizontal", mode = "determinate", maximum = 100, variable = self.progress_value)
+        self.progress_bar.pack(fill = "x")
         ttk.Label(progress_frame, textvariable = self.progress_text).pack(anchor = "e")
 
 
@@ -201,22 +202,21 @@ class TrackViewer:
                 self.progress_text.set("00:00 / 00:00")
             elif self.on_get_playback_state is not None:
                 is_playing, is_paused = self.on_get_playback_state()
+
                 if is_playing or is_paused:
                     pos_ms = pygame.mixer.music.get_pos()
-                    
                     if pos_ms < 0:
                         elapsed = 0
                     else:
-                        elapsed = min(elapsed / 100.0, self.current_track_length)
+                        elapsed = min(pos_ms / 1000.0, self.current_track_length)
+                    
                     percent = (elapsed / self.current_track_length) * 100
-
                     self.progress_value.set(percent)
                     self.progress_text.set(f"{self._format_time(elapsed)} / {self._format_time(self.current_track_length)}")
-            
                 else:
                     self.progress_value.set(0)
                     self.progress_text.set("00:00 / 00:00")
-                
+            
             else:
                 self.progress_value.set(0)
                 self.progress_text.set("00:00 / 00:00")
@@ -227,6 +227,7 @@ class TrackViewer:
 
         self.progress_after_id = self.window.after(250, self._update_progress_bar)
 
+    
     
     def stop_playback(self):
         if self.on_stop_track is None:
