@@ -28,6 +28,7 @@ class CreateTracklist:
         self.current_index = -1
         self.is_playing = False
         self.is_paused = False
+        self.is_seeking = False
         self.after_id = None
         self.playback_id = 0
         self.checking = False
@@ -44,6 +45,7 @@ class CreateTracklist:
         self.progress_value = tk.DoubleVar(value = 0)
         self.progress_text = tk.StringVar(value = "00:00 / 00:00")
         self.current_track_length = 0.0
+        self.current_track_offset = 0.0
         
 
         controls = ttk.Frame(window, padding = 10)
@@ -116,9 +118,14 @@ class CreateTracklist:
         progress_frame = ttk.Frame(window, padding = (10, 0, 10, 0))
         progress_frame.pack(fill = "x")
 
-        self.progress_bar = ttk.Progressbar(progress_frame, orient = "horizontal", mode = "determinate", maximum = 100, variable = self.progress_value)
+        self.progress_bar = tk.Scale(progress_frame, from_ = 0, to = 100, orient = "horizontal", showvalue = False, resolution = 0.1, variable = self.progress_value, length = 500, command = self._seek_change)
         self.progress_bar.pack(fill = "x")
+
+        self.progress_bar.bind("<ButtonPress-1>", self._begin_seek)
+        self.progress_bar.bind("<ButtonRelease-1>", self._end_seek)
+
         ttk.Label(progress_frame, textvariable = self.progress_text).pack(anchor = "e")
+
 
 
 
@@ -159,28 +166,81 @@ class CreateTracklist:
             if self.current_track_number is None or self.current_track_length <= 0:
                 self.progress_value.set(0)
                 self.progress_text.set("00:00 / 00:00")
-            
             elif self.is_playing or self.is_paused:
-                pos_ms = pygame.mixer.music.get_pos()
+                if not self.is_seeking:
+                    pos_ms = pygame.mixer.music.get_pos()
+                    if pos_ms < 0:
+                        elapsed = self.current_track_offset
+                    else:
+                        elapsed = min(self.current_track_offset + (pos_ms / 1000.0), self.current_track_length)
 
-                if pos_ms < 0:
-                    elapsed = 0
-                else:
-                    elapsed = min(pos_ms / 1000.0, self.current_track_length)
-                
-                percent = (elapsed / self.current_track_length) * 100
-                self.progress_value.set(percent)
-                self.progress_text.set(f"{self._format_time(elapsed)} / {self._format_time(self.current_track_length)}")
-            
+                    percent = (elapsed / self.current_track_length) * 100
+                    self.progress_value.set(percent)
+                    self.progress_text.set(f"{self._format_time(elapsed)} / {self._format_time(self.current_track_length)}")
+
             else:
                 self.progress_value.set(0)
-                self.progress_text.set("00:00 / 00")
-            
+                self.progress_text.set("00:00 / 00:00")
+
         except Exception:
             self.progress_value.set(0)
             self.progress_text.set("00:00 / 00:00")
-        
+
         self.progress_after_id = self.window.after(250, self._update_progress_bar)
+
+
+
+    def _begin_seek(self, event = None):
+        self.is_seeking = True
+    
+    def _end_seek(self, event = None):
+        if self.current_track_number is None or self.current_track_length <= 0:
+            self.is_seeking = False
+            return
+        
+        seek_percent = float(self.progress_value.get())
+        seek_seconds = (seek_percent / 100.0) * self.current_track_length
+
+        if self.playback_mode == "tracklist" and 0 <= self.current_index < len(self.tracklist):
+            track_number = self.tracklist[self.current_index]
+            looping = self._is_looped_track(self.current_index)
+        elif self.playback_mode == "single":
+            track_number = self.current_track_number
+            looping = self.current_track_number in self.looped_track_numbers
+        else:
+            self.is_seeking = False
+            return
+        
+        self.playback_id += 1
+        self._stop_current_playback()
+        self.is_playing = True
+        self.is_paused = False
+        self.checking = True
+
+        if self.library.play_track(track_number, loop = looping, start_seconds = seek_seconds):
+            self.current_track_number = track_number
+            self.current_track_length = self.library.get_track_length(track_number)
+            self.current_track_offset = seek_seconds 
+            self.status_text.set(f"Seeked to {self._format_time(seek_seconds)}.")
+        else:
+            self.status_text.set("Error occurred. Please try again.")
+
+        self.is_seeking = False
+
+
+
+    def _seek_change(self, value):
+        if self.current_track_length <= 0:
+            return
+        try:
+            seek_percent = float(value)
+        except(TypeError, ValueError):
+            return
+        
+        seek_seconds = (seek_percent / 100.0) * self.current_track_length
+        self.progress_text.set(f"{self._format_time(seek_seconds)} / {self._format_time(self.current_track_length)}")
+
+
 
 
 

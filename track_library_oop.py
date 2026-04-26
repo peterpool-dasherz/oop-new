@@ -187,16 +187,32 @@ class TrackLibrary:
             pygame.mixer.init()
         return True
 
-    def play_track(self, track_number, loop = False):
+    def play_track(self, track_number, loop = False, start_seconds = 0.0):
         audio_path = self.get_audio_path(track_number)
         if audio_path is None or not audio_path.exists():
             return False
         if not self._init_audio():
             return False
+        
         pygame.mixer.music.stop()
         pygame.mixer.music.load(str(audio_path))
-        pygame.mixer.music.play(loops = -1 if loop else 0)
+
+        start_seconds = max(0.0, float(start_seconds))
+        if start_seconds > 0:
+            if loop:
+                pygame.mixer.music.play(loops = -1, start = start_seconds)
+            else:
+                pygame.mixer.music.play(loops = 0, start = start_seconds)
+        else:
+            if loop:
+                pygame.mixer.music.play(loops = -1)
+            else:
+                pygame.mixer.music.play(loops = 0)
         return True
+    
+
+
+
 
     def stop_track(self):
         if pygame is not None and pygame.mixer.get_init():
