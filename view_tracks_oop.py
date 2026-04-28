@@ -200,6 +200,7 @@ class TrackViewer:
             if self.current_track_number is None or self.current_track_length <= 0:
                 self.progress_value.set(0)
                 self.progress_text.set("00:00 / 00:00")
+
             elif self.on_get_playback_state is not None:
                 is_playing, is_paused = self.on_get_playback_state()
 
@@ -213,10 +214,11 @@ class TrackViewer:
                     percent = (elapsed / self.current_track_length) * 100
                     self.progress_value.set(percent)
                     self.progress_text.set(f"{self._format_time(elapsed)} / {self._format_time(self.current_track_length)}")
+                
                 else:
                     self.progress_value.set(0)
                     self.progress_text.set("00:00 / 00:00")
-            
+                
             else:
                 self.progress_value.set(0)
                 self.progress_text.set("00:00 / 00:00")
@@ -239,8 +241,13 @@ class TrackViewer:
             self.current_track_length = 0.0
             self.progress_value.set(0)
             self.progress_text.set("00:00 / 00:00")
+
+            if self.progress_after_id:
+                self.window.after_cancel(self.progress_after_id)
+                self.progress_after_id = None
+
             self.status_text.set("Playback stopped.")
-        
+
         else:
             self.status_text.set("Error occurred. Please try again.")
 
@@ -258,31 +265,38 @@ class TrackViewer:
             self.status_text.set("Error occurred. Please try again.")
             return
         
+        name = self.library.get_name(track_number) or track_number
         is_playing, is_paused = self.on_get_playback_state()
+
         if is_paused:
             if self.on_resume_track():
-                name = self.library.get_name(track_number) or track_number 
-                self.status_text.set(f"Playback resumed for {name}.")
+                self.current_track_number = track_number 
+                self.current_track_length = self.library.get_track_length(track_number)
+                self.progress_value.set(0)
+                self.progress_text.set(f"00:00 / {self._format_time(self.current_track_length)}")
+                self.status_text.set(f"Playing '{name}'.")
             else:
                 self.status_text.set("Error occurred. Please try again.")
             return
         
         if is_playing:
             if self.on_pause_track():
-                name = self.library.get_name(track_number) or track_number 
-                self.status_text.set(f"Playback paused for {name}.")
+                self.status_text.set("Playback paused.")
             else:
                 self.status_text.set("Error occurred. Please try again.")
             return
         
         if self.on_play_track(track_number):
-            name = self.library.get_name(track_number) or track_number
             self.current_track_number = track_number
             self.current_track_length = self.library.get_track_length(track_number)
+            self.progress_value.set(0)
+            self.progress_text.set(f"00:00 / {self._format_time(self.current_track_length)}")
             self.status_text.set(f"Playing '{name}'.")
         else:
-            self.status_text.set(f"Error playing '{name}'. Please try again.")
-    
+            self.status_text.set("Error occurred. Please try again.")
+
+
+
 
     def toggle_loop_song(self):
         if self.on_toggle_loop_song is None:

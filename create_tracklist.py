@@ -411,6 +411,7 @@ class CreateTracklist:
                 self.current_index = next_index
                 self.current_track_number = track_number
                 self.current_track_length = self.library.get_track_length(track_number)
+                self.current_track_offset = 0.0
                 self.playback_mode = "tracklist"
                 self.status_text.set(f"Played '{name}'.")
 
@@ -505,6 +506,7 @@ class CreateTracklist:
 
 
     def _play_track_at_index(self, index, playback_id = None):
+        self.current_track_offset = 0.0
         if index < 0 or index >= len(self.tracklist):
             self.status_text.set("Error occurred. Please try again.")
             return
@@ -525,6 +527,7 @@ class CreateTracklist:
         self.current_index = index
         self.current_track_number = track_number
         self.current_track_length = self.library.get_track_length(track_number)
+        self.current_track_offset = 0.0
         self.playback_mode = "tracklist"
 
         if not looping:
@@ -670,6 +673,24 @@ class CreateTracklist:
         self._reset_playback_buttons()
 
         self._update_progress_bar()
+    
+    def pause_playback(self):
+        self._mixer_check()
+
+        if not self.is_playing and not self.is_paused:
+            self.status_text.set("Nothing is currently playing.")
+            return
+        
+        pygame.mixer.music.pause()
+        self.is_playing = False
+        self.is_paused = True
+        self.checking = False
+        self.status_text.set("Playback paused.")
+
+        if self.after_id:
+            self.window.after_cancel(self.after_id)
+            self.after_id = None
+    
         
     def _stop_current_playback(self):
         if self.after_id:
@@ -719,6 +740,7 @@ class CreateTracklist:
 
     
     def _play_track_number(self, track_number):
+        self.current_track_offset = 0.0
         name = self.library.get_name(track_number)
         if name is None:
             self.status_text.set("Please enter a track number.")
@@ -736,6 +758,7 @@ class CreateTracklist:
             self.playback_mode = "single"
             self.current_track_number = track_number
             self.current_track_length = self.library.get_track_length(track_number)
+            self.current_track_offset = 0.0
             self.current_index = -1
             self.checking = True
         else:
