@@ -7,7 +7,7 @@ import pygame
 
 
 class TrackViewer:
-    def __init__(self, window, library = None, theme_mode = "System", on_play_track = None, on_add_to_tracklist = None, on_pause_track = None, on_resume_track = None, on_get_playback_state = None, on_toggle_loop_song = None, on_stop_track = None):
+    def __init__(self, window, library = None, theme_mode = "System", on_play_track = None, on_add_to_tracklist = None, on_pause_track = None, on_resume_track = None, on_get_playback_state = None, on_toggle_loop_song = None, on_stop_track = None, on_seek_track = None, on_get_current_track_info = None):
         self.window = window
         self.window.title("View Tracks")
         self.window.geometry("1150x650")
@@ -26,6 +26,8 @@ class TrackViewer:
         self.on_stop_track = on_stop_track
         self.on_get_playback_state = on_get_playback_state
         self.on_toggle_loop_song = on_toggle_loop_song
+        self.on_seek_track = on_seek_track
+        self.on_get_current_track_info = on_get_current_track_info
         self.current_track_number = None
         self.current_track_length = 0.0
         self.progress_after_id = None
@@ -89,8 +91,12 @@ class TrackViewer:
         progress_frame = ttk.Frame(self.window, padding = (10, 0, 10, 0))
         progress_frame.pack(fill = "x")
 
-        self.progress_bar = ttk.Progressbar(progress_frame, orient = "horizontal", mode = "determinate", maximum = 100, variable = self.progress_value)
+        self.progress_bar = tk.Scale(progress_frame, from_ = 0, to = 100, orient = "horizontal", showvalue = False, resolution = 0.1, variable = self.progress_value, length = 500, command = self.seek_change)
         self.progress_bar.pack(fill = "x")
+
+        self.progress_bar.bind("<ButtonPress-1>", self._begin_seek)
+        self.progress_bar.bind("<ButtonRelease-1>", self._end_seek)
+
         ttk.Label(progress_frame, textvariable = self.progress_text).pack(anchor = "e")
 
 
@@ -197,28 +203,35 @@ class TrackViewer:
     
     def _update_progress_bar(self):
         try:
+            if self.on_get_current_track_info is not None:
+                track_number, total, offset = self.on_get_current_track_info()
+                self.current_track_number = track_number 
+                self.current_track_length = total
+                self.current_track_offset = offset
+            
             if self.current_track_number is None or self.current_track_length <= 0:
                 self.progress_value.set(0)
                 self.progress_text.set("00:00 / 00:00")
-
+            
             elif self.on_get_playback_state is not None:
                 is_playing, is_paused = self.on_get_playback_state()
 
                 if is_playing or is_paused:
-                    pos_ms = pygame.mixer.music.get_pos()
-                    if pos_ms < 0:
-                        elapsed = 0
-                    else:
-                        elapsed = min(pos_ms / 1000.0, self.current_track_length)
+                    if not self.is_seeking:
+                        pos_ms = pygame.mixer.music.get_pos()
+                        if pos_ms < 0:
+                            elapsed = 0
+                        else:
+                            elapsed = min(self.current_track_offset + (pos_ms / 1000.0), self.current_track_length)
+                        
+                        percent = (elapsed / self.current_track_length) * 100
+                        self.progress_value.set(percent)
+                        self.progress_text.set(f"{self._format_time(elapsed)} / {self._format_time(self.current_track_length)}")
                     
-                    percent = (elapsed / self.current_track_length) * 100
-                    self.progress_value.set(percent)
-                    self.progress_text.set(f"{self._format_time(elapsed)} / {self._format_time(self.current_track_length)}")
-                
                 else:
                     self.progress_value.set(0)
                     self.progress_text.set("00:00 / 00:00")
-                
+            
             else:
                 self.progress_value.set(0)
                 self.progress_text.set("00:00 / 00:00")
@@ -226,8 +239,48 @@ class TrackViewer:
         except Exception:
             self.progress_value.set(0)
             self.progress_text.set("00:00 / 00:00")
-
+        
         self.progress_after_id = self.window.after(250, self._update_progress_bar)
+
+
+
+    def _begin_seek(self, event = None):
+        self.is_seeking = True
+    
+    def seek_change(self, value):
+        if self.current_track_length <= 0:
+            return
+        
+        try:
+            seek_percent = float(value)
+        except (TypeError, ValueError):
+            return
+        
+        seek_seconds = (seek_percent / 100.0) * self.current_track_length
+        self.progress_text.set(f"{self._format_time(seek_seconds)} / {self._format_time(self.current_track_length)}")
+    
+    def _end_seek(self, event = None):
+        if self.on_seek_track is None:
+            self.is_seeking = False
+            return
+        
+        if self.current_track_number is None or self.current_track_length <= 0:
+            self.is_seeking = False
+            return
+        
+        seek_percent = float(self.progress_value.get())
+        seek_seconds = (seek_percent / 100.0)* self.current_track_length
+
+        if self.on_seek_track(seek_seconds):
+            self.current_track_offset = self.current_track_offset 
+            self.progress_text.set(f"{self._format_time(seek_seconds)} / {self._format_time(self.current_track_length)}")
+        else:
+            self.status_text.set("Error occurred.")
+        
+        self.is_seeking = False
+
+
+
 
     
     
@@ -239,17 +292,13 @@ class TrackViewer:
         if self.on_stop_track():
             self.current_track_number = None
             self.current_track_length = 0.0
+            self.current_track_offset = 0.0
             self.progress_value.set(0)
             self.progress_text.set("00:00 / 00:00")
-
-            if self.progress_after_id:
-                self.window.after_cancel(self.progress_after_id)
-                self.progress_after_id = None
-
             self.status_text.set("Playback stopped.")
-
         else:
             self.status_text.set("Error occurred. Please try again.")
+
 
 
 
@@ -272,28 +321,32 @@ class TrackViewer:
             if self.on_resume_track():
                 self.current_track_number = track_number 
                 self.current_track_length = self.library.get_track_length(track_number)
-                self.progress_value.set(0)
-                self.progress_text.set(f"00:00 / {self._format_time(self.current_track_length)}")
-                self.status_text.set(f"Playing '{name}'.")
+                self.status_text.set("Playback resumed.")
             else:
-                self.status_text.set("Error occurred. Please try again.")
+                self.status_text.set("Error occurred.")
             return
         
         if is_playing:
             if self.on_pause_track():
                 self.status_text.set("Playback paused.")
             else:
-                self.status_text.set("Error occurred. Please try again.")
+                self.status_text.set("Error occurred.")
             return
         
         if self.on_play_track(track_number):
-            self.current_track_number = track_number
+            self.current_track_number = track_number 
             self.current_track_length = self.library.get_track_length(track_number)
+            self.current_track_offset = 0.0
             self.progress_value.set(0)
             self.progress_text.set(f"00:00 / {self._format_time(self.current_track_length)}")
-            self.status_text.set(f"Playing '{name}'.")
+            self.status_text.set(f"Played '{name}'.")
         else:
             self.status_text.set("Error occurred. Please try again.")
+
+            
+
+
+
 
 
 

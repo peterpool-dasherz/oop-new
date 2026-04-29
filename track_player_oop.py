@@ -42,6 +42,10 @@ class TrackPlayer:
 
         self.song_loop = False 
 
+        self.current_track_number = None
+        self.current_track_length = 0.0
+        self.current_track_offset = 0.0
+
         if self.theme_mode == "System":
             font.apply_device_theme(self.window)
         else:
@@ -91,7 +95,7 @@ class TrackPlayer:
             self.logout_callback()
     
     def open_view_tracks_oop(self):
-        TrackViewer(tk.Toplevel(self.window), self.library, theme_mode = self.theme_mode, on_play_track = self.play_track_now, on_add_to_tracklist = self.add_track_to_tracklist, on_pause_track = self.pause_track_now, on_resume_track = self.resume_track_now, on_get_playback_state = self.get_playback_state, on_toggle_loop_song = self.toggle_loop_song, on_stop_track = self.stop_current_track)
+        TrackViewer(tk.Toplevel(self.window), self.library, theme_mode = self.theme_mode, on_play_track = self.play_track_now, on_add_to_tracklist = self.add_track_to_tracklist, on_pause_track = self.pause_track_now, on_resume_track = self.resume_track_now, on_get_playback_state = self.get_playback_state, on_toggle_loop_song = self.toggle_loop_song, on_stop_track = self.stop_current_track, on_seek_track = self.seek_track, on_get_current_track_info = self.get_current_track_info)
     def open_create_tracklist(self):
         self.create_tracklist_app = CreateTracklist(tk.Toplevel(self.window), self.library, theme_mode = self.theme_mode)
     def open_update_tracks(self):
@@ -114,7 +118,7 @@ class TrackPlayer:
     def get_playback_state(self):
         return self.is_playing, self.is_paused
     
-    def play_track_now(self, track_number):
+    def play_track_now(self, track_number, start_seconds = 0.0):
         if not track_number:
             return False
         
@@ -126,23 +130,36 @@ class TrackPlayer:
         if self.library.get_name(track_number) is None:
             return False
         
-        played = self.library.play_track(track_number, loop = self.song_loop)
+        played = self.library.play_track(track_number, loop = self.song_loop, start_seconds = start_seconds)
         if played:
             self.library.increment_play_count(track_number)
-            self.tracklist_playing = False
             self.is_playing = True
             self.is_paused = False
+            self.tracklist_playing = False
+            self.current_track_number = track_number 
+            self.current_track_length = self.library.get_track_length(track_number)
+            self.current_track_offset = max(0.0, float(start_seconds))
         return played
+    
+
+    
+
     
     def stop_current_track(self):
         self.library.stop_track()
-        self.is_playing = True
+        self.is_playing = False
         self.is_paused = False
         self.tracklist_playing = False
         self.playback_mode = None
         self.current_track_number = None
+        self.current_track_length = 0.0
+        self.current_track_offset = 0.0
         self.current_index = -1
         return True
+    
+
+    
+
     
 
     
@@ -159,15 +176,21 @@ class TrackPlayer:
         return False
     
 
+    
+    
+
     def resume_track_now(self):
         if not self.is_paused:
             return False
         
         if self.library.resume_track():
             self.is_playing = True
-            self.is_pause = False
+            self.is_paused = False
             return True
         return False
+    
+    
+
     
     def toggle_song_loop(self):
         self.song_loop = not self.song_loop
@@ -207,7 +230,27 @@ class TrackPlayer:
         self.song_loop = not self.song_loop
         return self.song_loop
     
+    def get_current_track_info(self):
+        return self.current_track_number, self.current_track_length, self.current_track_offset
+    
+    def seek_track(self, seek_seconds):
+        if self.current_track_number is None or self.current_track_length <= 0:
+            return False
         
+        seek_seconds = max(0.0, min(float(seek_seconds), self.current_track_length))
+
+        played = self.library.play_track(self.current_track_number, loop = self.song_loop, start_seconds = seek_seconds)
+
+        if not played:
+            return False
+        
+        self.is_playing = True
+        self.is_paused = False
+        self.current_track_offset = seek_seconds
+        self.current_track_length = self.library.get_track_length(self.current_track_number)
+        return True
+    
+
         
 
         
