@@ -21,72 +21,77 @@ def session_exists():
     return session_file.exists()
 
 class TrackPlayer:
+    # Main application window that opens the viewer, tracklist manager, and rating editor.
     def __init__(self, window):
-        self.window = window
-        self.window.title("JukeBox")
-        self.window.geometry("780x220")
-        self.window.configure(bg = "gray")
+        self.window = window  # store the main Tk window
+        self.window.title("JukeBox")  # set the application title
+        self.window.geometry("780x220")  # set the default launcher size
+        self.window.configure(bg = "gray")  # apply a simple background color
 
-        self.library = lib.TrackLibrary()
-        self.library.load_custom_tracks_from_csv(Path(__file__).with_name("saved_tracklist.csv"))
-        self.library.load_lib_state(Path(__file__).with_name("saved_library.csv"))
-        self.state_file = Path(__file__).with_name("saved_library.csv")
-        self.window.protocol("WM_DELETE_WINDOW", self.on_close)
+        self.library = lib.TrackLibrary()  # create the shared track library
+        self.library.load_custom_tracks_from_csv(Path(__file__).with_name("saved_tracklist.csv"))  # restore custom tracks
+        self.library.load_lib_state(Path(__file__).with_name("saved_library.csv"))  # restore saved ratings and play counts
+        self.state_file = Path(__file__).with_name("saved_library.csv")  # remember the library state file path
+        self.window.protocol("WM_DELETE_WINDOW", self.on_close)  # save state before closing the app
 
-        self.settings_file = Path(__file__).with_name("saved_theme.txt")
-        self.theme_mode = font.load_theme_mode(self.settings_file)
-        font.set_theme_mode(self.theme_mode)
+        self.settings_file = Path(__file__).with_name("saved_theme.txt")  # theme settings file path
+        self.theme_mode = font.load_theme_mode(self.settings_file)  # load the saved theme mode
+        font.set_theme_mode(self.theme_mode)  # apply the saved theme mode globally
 
-        self.is_playing = False
-        self.is_paused = False
+        self.is_playing = False  # track whether a song is currently playing
+        self.is_paused = False  # track whether a song is currently paused
 
-        self.song_loop = False 
+        self.song_loop = False  # remember whether single-track looping is enabled
 
-        self.current_track_number = None
-        self.current_track_length = 0.0
-        self.current_track_offset = 0.0
+        self.current_track_number = None  # cache the active track number
+        self.current_track_length = 0.0  # cache the active track length for seeking
+        self.current_track_offset = 0.0  # store the current seek offset
 
         if self.theme_mode == "System":
             font.apply_device_theme(self.window)
         else:
             font.apply_theme(self.window, self.theme_mode)
 
-        self.logout_callback = None
-        self.create_tracklist_app = None
+        self.logout_callback = None  # callback to run after logout
+        self.create_tracklist_app = None  # reference to the tracklist window if it opens
         
-        self.song_loop = False 
+        self.song_loop = False  # duplicate initialization kept for current code structure
 
-        container = ttk.Frame(window, padding = 16)
-        container.pack(fill = "both", expand = True)
+        container = ttk.Frame(window, padding = 16)  # main launcher container
+        container.pack(fill = "both", expand = True)  # stretch the container to fill the window
 
-        track_player_label = ttk.Label(container, text = "Select an option from the buttons below")
-        track_player_label.pack(fill = "x", pady = (0, 16))
+        track_player_label = ttk.Label(container, text = "Select an option from the buttons below")  # title text
+        track_player_label.pack(fill = "x", pady = (0, 16))  # place the title at the top of the window
 
-        button_row = ttk.Frame(container)
-        button_row.pack()
+        button_row = ttk.Frame(container)  # row that holds the main navigation buttons
+        button_row.pack()  # place the button row in the launcher
 
-        view_tracks_button = ttk.Button(button_row, text = "Manage Tracks", command = self.open_view_tracks_oop)
-        view_tracks_button.pack(side = "left", padx = 12)
-        create_tracklist_button = ttk.Button(button_row, text = "Manage Tracklist", command = self.open_create_tracklist)
-        create_tracklist_button.pack(side = "left", padx = 12)
-        update_tracks_button = ttk.Button(button_row, text = "Update Track Rating", command = self.open_update_tracks)
-        update_tracks_button.pack(side = "left", padx = 12)
+        view_tracks_button = ttk.Button(button_row, text = "Manage Tracks", command = self.open_view_tracks_oop)  # open the track viewer
+        view_tracks_button.pack(side = "left", padx = 12)  # place the viewer button
+        create_tracklist_button = ttk.Button(button_row, text = "Manage Tracklist", command = self.open_create_tracklist)  # open the tracklist manager
+        create_tracklist_button.pack(side = "left", padx = 12)  # place the tracklist button
+        update_tracks_button = ttk.Button(button_row, text = "Update Track Rating", command = self.open_update_tracks)  # open the rating editor
+        update_tracks_button.pack(side = "left", padx = 12)  # place the update button
 
-        theme_frame = ttk.LabelFrame(container, text = "Theme", padding = 8)
-        theme_frame.pack(fill = "x", pady = (16, 0))
+        theme_frame = ttk.LabelFrame(container, text = "Theme", padding = 8)  # theme selection section
+        theme_frame.pack(fill = "x", pady = (16, 0))  # place the theme controls below the buttons
 
-        ttk.Label(theme_frame, text = "Select theme:").pack(side = "left", padx = (0, 12))
-        ttk.Button(theme_frame, text = "Mirror system settings", command = lambda: self.set_theme("System")).pack(side = "left", padx = 4)
-        ttk.Button(theme_frame, text = "Light", command = lambda: self.set_theme("Light")).pack(side = "left", padx = 4)
-        ttk.Button(theme_frame, text = "Dark", command = lambda: self.set_theme("Dark")).pack(side = "left", padx = 4)
+        ttk.Label(theme_frame, text = "Select theme:").pack(side = "left", padx = (0, 12))  # label for the theme buttons
+        ttk.Button(theme_frame, text = "Mirror system settings", command = lambda: self.set_theme("System")).pack(side = "left", padx = 4)  # use the OS theme
+        ttk.Button(theme_frame, text = "Light", command = lambda: self.set_theme("Light")).pack(side = "left", padx = 4)  # switch to light mode
+        ttk.Button(theme_frame, text = "Dark", command = lambda: self.set_theme("Dark")).pack(side = "left", padx = 4)  # switch to dark mode
 
-        ttk.Button(button_row, text = "Logout", command = self.logout).pack(side = "left", padx = 12)
+        ttk.Button(button_row, text = "Logout", command = self.logout).pack(side = "left", padx = 12)  # let the user log out
 
         
 
+    # Store the function that should run after logout.
+    # Store the callback that should run after logout.
     def set_logout_callback(self, callback):
         self.logout_callback = callback
         
+    # Clear the session and close the current application window.
+    # Clear the session, save state, and close the launcher window.
     def logout(self):
         clear_session()
         self.library.save_lib_state(self.state_file)
@@ -94,16 +99,26 @@ class TrackPlayer:
         if self.logout_callback:
             self.logout_callback()
     
+    # Open the track viewer window and pass playback callbacks into it.
+    # Open the track viewer and pass the playback callbacks into it.
     def open_view_tracks_oop(self):
         TrackViewer(tk.Toplevel(self.window), self.library, theme_mode = self.theme_mode, on_play_track = self.play_track_now, on_add_to_tracklist = self.add_track_to_tracklist, on_pause_track = self.pause_track_now, on_resume_track = self.resume_track_now, on_get_playback_state = self.get_playback_state, on_toggle_loop_song = self.toggle_loop_song, on_stop_track = self.stop_current_track, on_seek_track = self.seek_track, on_get_current_track_info = self.get_current_track_info)
+    # Open the tracklist editor window.
+    # Open the tracklist manager window.
     def open_create_tracklist(self):
         self.create_tracklist_app = CreateTracklist(tk.Toplevel(self.window), self.library, theme_mode = self.theme_mode)
+    # Open the track rating editor window.
+    # Open the rating editor window.
     def open_update_tracks(self):
         UpdateTracks(tk.Toplevel(self.window), self.library, theme_mode = self.theme_mode)
+    # Save state and shut down the app cleanly.
+    # Save state and close the app cleanly.
     def on_close(self):
         self.library.save_lib_state(self.state_file)
         font.save_theme_mode(self.settings_file, self.theme_mode)
         self.window.destroy()
+    # Update the theme and save it for the next session.
+    # Update the theme and save the selection for later sessions.
     def set_theme(self, mode):
         self.theme_mode = mode
         font.set_theme_mode(mode)
@@ -115,9 +130,13 @@ class TrackPlayer:
         else:
             font.apply_theme(self.window, mode)
     
+    # Expose the current playback state to the viewer window.
+    # Return the current playback state to the viewer window.
     def get_playback_state(self):
         return self.is_playing, self.is_paused
     
+    # Play a track through the shared library and update playback state.
+    # Play a selected track and update the shared playback state.
     def play_track_now(self, track_number, start_seconds = 0.0):
         if not track_number:
             return False
@@ -145,6 +164,8 @@ class TrackPlayer:
     
 
     
+    # Stop playback and clear the current track state.
+    # Stop playback and clear the active track state.
     def stop_current_track(self):
         self.library.stop_track()
         self.is_playing = False
@@ -165,6 +186,8 @@ class TrackPlayer:
     
 
     
+    # Pause the current track if one is active.
+    # Pause the active track if one is currently playing.
     def pause_track_now(self):
         if not self.is_playing:
             return False
@@ -179,6 +202,8 @@ class TrackPlayer:
     
     
 
+    # Resume playback after a pause.
+    # Resume playback after a pause.
     def resume_track_now(self):
         if not self.is_paused:
             return False
@@ -192,6 +217,8 @@ class TrackPlayer:
     
 
     
+    # Toggle looping for the current single track.
+    # Toggle looping for the current single track.
     def toggle_song_loop(self):
         self.song_loop = not self.song_loop
         return self.song_loop
@@ -199,6 +226,8 @@ class TrackPlayer:
     
 
     
+    # Add a selected track to the shared tracklist window.
+    # Add a selected track to the shared tracklist window.
     def add_track_to_tracklist(self, track_number):
         if not track_number:
             return False
@@ -226,13 +255,19 @@ class TrackPlayer:
         self.create_tracklist_app.save_tracklist()
         return True
     
+    # Toggle single-track looping from the viewer window.
+    # Toggle looping for the single-track player from the viewer window.
     def toggle_loop_song(self):
         self.song_loop = not self.song_loop
         return self.song_loop
     
+    # Return the active track metadata for the viewer progress bar.
+    # Return the active track information for the seekable progress slider.
     def get_current_track_info(self):
         return self.current_track_number, self.current_track_length, self.current_track_offset
     
+    # Restart the current track from a new seek position.
+    # Restart the active track from a new seek position.
     def seek_track(self, seek_seconds):
         if self.current_track_number is None or self.current_track_length <= 0:
             return False
@@ -257,6 +292,7 @@ class TrackPlayer:
    
 
 class LoginWindow:
+    # Login form shown before the user can enter the main application.
     def __init__(self, root, on_success):
         self.root = root
         self.on_success = on_success
@@ -280,6 +316,7 @@ class LoginWindow:
         ttk.Label(frame, textvariable = self.message_var).grid(row = 3, column = 0, columnspan = 2)
         self.root.bind("<Return>", lambda event: self.login())
     
+    # Validate the login credentials and open the main app if they match.
     def login(self):
         username = self.username_var.get().strip().lower()
         password = self.password_var.get().strip()

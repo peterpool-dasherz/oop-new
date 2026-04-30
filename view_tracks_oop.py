@@ -7,116 +7,119 @@ import pygame
 
 
 class TrackViewer:
+    # Track browser window for listing, searching, viewing, and controlling playback.
     def __init__(self, window, library = None, theme_mode = "System", on_play_track = None, on_add_to_tracklist = None, on_pause_track = None, on_resume_track = None, on_get_playback_state = None, on_toggle_loop_song = None, on_stop_track = None, on_seek_track = None, on_get_current_track_info = None):
-        self.window = window
-        self.window.title("View Tracks")
-        self.window.geometry("1150x650")
-        self.library = library or lib.TrackLibrary()
+        self.window = window  # store the Tk window for this viewer
+        self.window.title("View Tracks")  # set the window title shown in the title bar
+        self.window.geometry("1150x650")  # set the default window size
+        self.library = library or lib.TrackLibrary()  # use the shared library if supplied
 
-        self.track_input = tk.StringVar()
-        self.search_input = tk.StringVar()
-        self.artists_filter_input = tk.StringVar(value = "All artists")
-        self.status_text = tk.StringVar(value = "Please enter track number to view track")
+        self.track_input = tk.StringVar()  # store the selected track number
+        self.search_input = tk.StringVar()  # store the free-text search query
+        self.artists_filter_input = tk.StringVar(value = "All artists")  # store the chosen artist filter
+        self.status_text = tk.StringVar(value = "Please enter track number to view track")  # store the status message shown at the bottom
 
-        self.theme_mode = theme_mode
-        self.on_play_track = on_play_track
-        self.on_add_to_tracklist = on_add_to_tracklist
-        self.on_pause_track = on_pause_track
-        self.on_resume_track = on_resume_track
-        self.on_stop_track = on_stop_track
-        self.on_get_playback_state = on_get_playback_state
-        self.on_toggle_loop_song = on_toggle_loop_song
-        self.on_seek_track = on_seek_track
-        self.on_get_current_track_info = on_get_current_track_info
-        self.current_track_number = None
-        self.current_track_length = 0.0
-        self.progress_after_id = None
-        self.progress_value = tk.DoubleVar(value = 0)
-        self.progress_text = tk.StringVar(value = "00:00 / 00:00")
+        self.theme_mode = theme_mode  # remember the current theme selection
+        self.on_play_track = on_play_track  # callback used to play a selected track
+        self.on_add_to_tracklist = on_add_to_tracklist  # callback used to add a track to the tracklist
+        self.on_pause_track = on_pause_track  # callback used to pause playback
+        self.on_resume_track = on_resume_track  # callback used to resume playback
+        self.on_stop_track = on_stop_track  # callback used to stop playback
+        self.on_get_playback_state = on_get_playback_state  # callback used to read playback state
+        self.on_toggle_loop_song = on_toggle_loop_song  # callback used to toggle looping
+        self.on_seek_track = on_seek_track  # callback used to seek within the current track
+        self.on_get_current_track_info = on_get_current_track_info  # callback used to fetch current track metadata
+        self.current_track_number = None  # cache the active track number for the progress slider
+        self.current_track_length = 0.0  # cache the active track length for the progress slider
+        self.current_track_offset = 0.0  # store the seek offset so displayed time stays correct
+        self.progress_after_id = None  # store the Tk timer ID for the progress refresh loop
+        self.progress_value = tk.DoubleVar(value = 0)  # store the slider percentage as a numeric Tk variable
+        self.progress_text = tk.StringVar(value = "00:00 / 00:00")  # store the time label text
 
-        controls = ttk.Frame(self.window, padding = 10)
-        controls.pack(fill = "x")
+        controls = ttk.Frame(self.window, padding = 10)  # top control bar container
+        controls.pack(fill = "x")  # stretch the control bar horizontally
 
-        top_row = ttk.Frame(controls)
-        top_row.pack(fill = "x", pady = (0, 8))
+        top_row = ttk.Frame(controls)  # first row of track actions
+        top_row.pack(fill = "x", pady = (0, 8))  # add spacing below the row
 
-        ttk.Button(top_row, text = "List All Tracks", command = self.list_tracks).pack(side = "left", padx = (0, 8))
-        ttk.Label(top_row, text = "Track Number").pack(side = "left", padx = (12, 4))
-        ttk.Entry(top_row, width = 8, textvariable = self.track_input).pack(side = "left", padx = (0, 8))
-        ttk.Button(top_row, text = "View Track", command = self.view_tracks).pack(side = "left")
-        ttk.Button(top_row, text = "Play selected track", command = self.toggle_play_pause).pack(side = "left", padx = (0, 8))
-        ttk.Button(top_row, text = "Add to Tracklist", command = self.add_selected_to_tracklist).pack(side = "left")
-        ttk.Button(top_row, text = "Loop Song", command = self.toggle_loop_song).pack(side = "left", padx = (0, 8))
-        ttk.Button(top_row, text = "Stop", command = self.stop_playback).pack(side = "left", padx= (0, 8))
+        ttk.Button(top_row, text = "List All Tracks", command = self.list_tracks).pack(side = "left", padx = (0, 8))  # show all tracks
+        ttk.Label(top_row, text = "Track Number").pack(side = "left", padx = (12, 4))  # label the track number field
+        ttk.Entry(top_row, width = 8, textvariable = self.track_input).pack(side = "left", padx = (0, 8))  # track number input box
+        ttk.Button(top_row, text = "View Track", command = self.view_tracks).pack(side = "left")  # show one track's details
+        ttk.Button(top_row, text = "Play selected track", command = self.toggle_play_pause).pack(side = "left", padx = (0, 8))  # start or control playback
+        ttk.Button(top_row, text = "Add to Tracklist", command = self.add_selected_to_tracklist).pack(side = "left")  # add selected track to playlist
+        ttk.Button(top_row, text = "Loop Song", command = self.toggle_loop_song).pack(side = "left", padx = (0, 8))  # toggle single-track looping
+        ttk.Button(top_row, text = "Stop", command = self.stop_playback).pack(side = "left", padx= (0, 8))  # stop playback
     
         
 
-        search_row = ttk.Frame(controls)
-        search_row.pack(fill = "x")
+        search_row = ttk.Frame(controls)  # second row for search and filtering
+        search_row.pack(fill = "x")  # stretch this row horizontally
 
-        ttk.Label(search_row, text = "Search").pack(side = "left", padx = (0, 4))
-        ttk.Entry(search_row, width = 28, textvariable = self.search_input).pack(side = "left", padx = (0, 10))
-        ttk.Button(search_row, text = "Search", command = self.search_tracks).pack(side = "left", padx = (0, 18))
+        ttk.Label(search_row, text = "Search").pack(side = "left", padx = (0, 4))  # label the search box
+        ttk.Entry(search_row, width = 28, textvariable = self.search_input).pack(side = "left", padx = (0, 10))  # search query field
+        ttk.Button(search_row, text = "Search", command = self.search_tracks).pack(side = "left", padx = (0, 18))  # run the search
 
-        ttk.Label(search_row, text = "Filter by Artist").pack(side = "left", padx = (0, 4))
-        self.artists_filter_combobox = ttk.Combobox(
+        ttk.Label(search_row, text = "Filter by Artist").pack(side = "left", padx = (0, 4))  # label the artist dropdown
+        self.artists_filter_combobox = ttk.Combobox(  # dropdown used to filter tracks by artist
             search_row,
             width = 24,
             textvariable = self.artists_filter_input,
             values = ["All artists", *self.library.list_artists()],
             state = "readonly"
         )
-        self.artists_filter_combobox.pack(side = "left", padx = (0, 8))
-        ttk.Button(search_row, text = "Apply", command = self.filter_tracks).pack(side = "left")
+        self.artists_filter_combobox.pack(side = "left", padx = (0, 8))  # place the dropdown in the row
+        ttk.Button(search_row, text = "Apply", command = self.filter_tracks).pack(side = "left")  # apply the chosen artist filter
 
-        content = ttk.Frame(self.window, padding = (10, 0, 10, 0))
-        content.pack(fill = "both", expand = True)
+        content = ttk.Frame(self.window, padding = (10, 0, 10, 0))  # main body container
+        content.pack(fill = "both", expand = True)  # allow the body to expand with the window
 
-        list_panel = ttk.LabelFrame(content, text = "Track List", padding = 8)
-        list_panel.pack(side = "left", fill = "both", expand = True)
-        self.list_text = tk.Text(list_panel, height = 22, width = 76, bg = "#31384a", fg = "#e7eaf0", insertbackground = "#e7eaf0", selectbackground = "#5f8fbe")
-            
-        self.list_text.pack(fill = "both", expand = True)
+        list_panel = ttk.LabelFrame(content, text = "Track List", padding = 8)  # left panel for the track list
+        list_panel.pack(side = "left", fill = "both", expand = True)  # stretch the panel to fill remaining space
+        self.list_text = tk.Text(list_panel, height = 22, width = 76, bg = "#31384a", fg = "#e7eaf0", insertbackground = "#e7eaf0", selectbackground = "#5f8fbe")  # text widget for track list output
+        self.list_text.pack(fill = "both", expand = True)  # make the list text fill the panel
 
-        detail_panel = ttk.LabelFrame(content, text = "Track Details", padding = 8)
-        detail_panel.pack(side = "left", fill = "y", padx = (12, 0))
-        self.detail_text = tk.Text(detail_panel, height = 22, width = 28, bg = "#31384a", fg = "#e7eaf0", insertbackground = "#e7eaf0", selectbackground = "#5f8fbe")
-            
-        self.detail_text.pack(fill = "both", expand = True)
+        detail_panel = ttk.LabelFrame(content, text = "Track Details", padding = 8)  # right panel for one-track details
+        detail_panel.pack(side = "left", fill = "y", padx = (12, 0))  # position the panel to the right
+        self.detail_text = tk.Text(detail_panel, height = 22, width = 28, bg = "#31384a", fg = "#e7eaf0", insertbackground = "#e7eaf0", selectbackground = "#5f8fbe")  # text widget for details output
+        self.detail_text.pack(fill = "both", expand = True)  # make the details fill the panel
 
-        status_bar = ttk.Label(self.window, textvariable = self.status_text, padding = (10, 8))
-        status_bar.pack(fill = "x")
-        self.refresh_artist_options()
+        status_bar = ttk.Label(self.window, textvariable = self.status_text, padding = (10, 8))  # status message line at the bottom
+        status_bar.pack(fill = "x")  # stretch the status bar across the window
+        self.refresh_artist_options()  # populate the artist dropdown with current artists
 
-        progress_frame = ttk.Frame(self.window, padding = (10, 0, 10, 0))
-        progress_frame.pack(fill = "x")
+        progress_frame = ttk.Frame(self.window, padding = (10, 0, 10, 0))  # container for the seek slider
+        progress_frame.pack(fill = "x")  # stretch the progress area across the window
 
-        self.progress_bar = tk.Scale(progress_frame, from_ = 0, to = 100, orient = "horizontal", showvalue = False, resolution = 0.1, variable = self.progress_value, length = 500, command = self.seek_change)
-        self.progress_bar.pack(fill = "x")
+        self.progress_bar = tk.Scale(progress_frame, from_ = 0, to = 100, orient = "horizontal", showvalue = False, resolution = 0.1, variable = self.progress_value, length = 500, command = self.seek_change)  # draggable slider for seeking
+        self.progress_bar.pack(fill = "x")  # stretch the slider across the window
 
-        self.progress_bar.bind("<ButtonPress-1>", self._begin_seek)
-        self.progress_bar.bind("<ButtonRelease-1>", self._end_seek)
+        self.progress_bar.bind("<ButtonPress-1>", self._begin_seek)  # remember when the user starts dragging
+        self.progress_bar.bind("<ButtonRelease-1>", self._end_seek)  # perform the seek when dragging ends
 
-        ttk.Label(progress_frame, textvariable = self.progress_text).pack(anchor = "e")
+        ttk.Label(progress_frame, textvariable = self.progress_text).pack(anchor = "e")  # show the current time label
 
 
-        if self.theme_mode == "System":
-            font.apply_device_theme(self.window)
+        if self.theme_mode == "System":  # apply the system theme if requested
+            font.apply_device_theme(self.window)  # use the operating system theme
         else:
-            font.apply_theme(self.window, self.theme_mode)
+            font.apply_theme(self.window, self.theme_mode)  # apply the selected custom theme
 
-        self._update_progress_bar()
+        self._update_progress_bar()  # start the repeating progress refresh loop
         
 
+    # Replace the contents of a text widget with new text.
     def set_text(self, text_area, content):
         text_area.configure(state = "normal")
         text_area.delete("1.0", tk.END)
         text_area.insert("1.0", content)
         text_area.configure(state = "disabled")
 
+    # Refresh the artist dropdown from the current library contents.
     def refresh_artist_options(self):
         self.artists_filter_combobox["values"] = ["All artists", *self.library.list_artists()]
 
+    # Show every track in the library.
     def list_tracks(self):
         self.refresh_artist_options()
         self.set_text(self.list_text, self.library.list_all())
@@ -124,6 +127,7 @@ class TrackViewer:
         self.status_text.set("List tracks button was clicked (all tracks displayed)")
         self.refresh_artist_options()
     
+    # Display the metadata for one selected track number.
     def view_tracks(self):
         raw_track = self.track_input.get().strip()
         if not raw_track:
@@ -145,6 +149,7 @@ class TrackViewer:
 
         self.set_text(self.detail_text, f"Track Number: {track_number}\nName: {name}\nArtist: {artist}\nRating: {rating}\nPlay Count: {play_count}")
         self.status_text.set("Track details displayed for track number " + track_number)
+    # Search tracks by name or artist text.
     def search_tracks(self):
         query = self.search_input.get().strip()
         selected_artist = self.artists_filter_input.get().strip()
@@ -160,6 +165,7 @@ class TrackViewer:
         count = len(result.splitlines())
         self.status_text.set(f"{count} tracks matched with request (Search button was clicked)")
 
+    # Filter the track list by the selected artist.
     def filter_tracks(self):
         self.refresh_artist_options()
         selected_artist = self.artists_filter_input.get().strip()
@@ -177,6 +183,7 @@ class TrackViewer:
         self.status_text.set(f"{count} tracks matched with request (Filter button was clicked)")
         self.refresh_artist_options()
 
+    # Clear the viewer panels and reset the input fields.
     def clear_all(self):
         self.set_text(self.list_text, "")
         self.set_text(self.detail_text, "")
@@ -189,6 +196,7 @@ class TrackViewer:
         self.progress_text.set("00:00 / 00:00")
         self.status_text.set("All fields cleared")
     
+    # Normalize the entered track number so it matches the library format.
     def _get_track_number_from_input(self):
         raw_track = self.track_input.get().strip()
         if not raw_track:
@@ -197,10 +205,12 @@ class TrackViewer:
             return raw_track.zfill(2)
         return raw_track.upper()
     
+    # Convert a time value into mm:ss format for the progress label.
     def _format_time(self, seconds):
         seconds = max(0, int(seconds))
         return f"{seconds // 60:02d} : {seconds % 60:02d}"
     
+    # Refresh the progress slider and time label from the active track state.
     def _update_progress_bar(self):
         try:
             if self.on_get_current_track_info is not None:
@@ -244,9 +254,11 @@ class TrackViewer:
 
 
 
+    # Mark the slider as being dragged so automatic updates do not overwrite it.
     def _begin_seek(self, event = None):
         self.is_seeking = True
     
+    # Update the time preview while the slider is being dragged.
     def seek_change(self, value):
         if self.current_track_length <= 0:
             return
@@ -259,6 +271,7 @@ class TrackViewer:
         seek_seconds = (seek_percent / 100.0) * self.current_track_length
         self.progress_text.set(f"{self._format_time(seek_seconds)} / {self._format_time(self.current_track_length)}")
     
+    # Seek the current track to the chosen position when the mouse is released.
     def _end_seek(self, event = None):
         if self.on_seek_track is None:
             self.is_seeking = False
@@ -284,6 +297,7 @@ class TrackViewer:
 
     
     
+    # Stop playback through the TrackPlayer callback and reset the cached state.
     def stop_playback(self):
         if self.on_stop_track is None:
             self.status_text.set("Error occurred. Please try again.")
@@ -304,6 +318,7 @@ class TrackViewer:
 
     
     
+    # Start, pause, or resume playback depending on the current audio state.
     def toggle_play_pause(self):
         track_number = self._get_track_number_from_input()
         if not track_number:
@@ -351,6 +366,7 @@ class TrackViewer:
 
 
 
+    # Toggle looping for the currently selected single track.
     def toggle_loop_song(self):
         if self.on_toggle_loop_song is None:
             self.status_text.set("Error occurred. Please try again.")
@@ -363,6 +379,7 @@ class TrackViewer:
             self.status_text.set("Song loop disabled.")
         
 
+    # Add the selected track to the shared tracklist.
     def add_selected_to_tracklist(self):
         track_number = self._get_track_number_from_input()
         if not track_number:

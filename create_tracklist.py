@@ -12,6 +12,7 @@ from tkinter import messagebox
 
 
 class CreateTracklist:
+    # Tracklist manager window for building and controlling playlists.
     def __init__(self, window, library = None, theme_mode = "System"):
         self.window = window
         self.window.title("Create Tracklist")
@@ -140,12 +141,14 @@ class CreateTracklist:
         
         self._update_progress_bar()
         
+    # Replace the contents of a text widget with new text.
     def set_text(self, text_area, content):
         text_area.configure(state = "normal")
         text_area.delete("1.0", tk.END)
         text_area.insert("1.0", content)
         text_area.configure(state = "disabled")
 
+    # Format the current tracklist for display in the text panel.
     def _format_tracklist(self):
         lines = []
         for index, track_number in enumerate(self.tracklist):
@@ -157,10 +160,12 @@ class CreateTracklist:
                 lines.append(f"{index + 1}. {name} ({track_number})")
         return "\n".join(lines)
     
+    # Convert seconds into mm:ss format for the progress label.
     def _format_time(self, seconds):
         seconds = max(0, int(seconds))
         return f"{seconds // 60:02d}:{seconds % 60:02d}"
     
+    # Refresh the progress slider and time label from the current playback position.
     def _update_progress_bar(self):
         try:
             if self.current_track_number is None or self.current_track_length <= 0:
@@ -244,9 +249,11 @@ class CreateTracklist:
 
 
 
+    # Refresh the visible tracklist text after a change.
     def _refresh_tracklist_text(self):
         self.set_text(self.tracklist_text, self._format_tracklist())
 
+    # Add a track from the shared library by track number.
     def add_track(self):
         raw = self.track_input.get().strip()
         track_number = raw.zfill(2) if raw.isdigit() else raw
@@ -267,6 +274,7 @@ class CreateTracklist:
         self._refresh_tracklist_text()
         self.status_text.set(f"Added '{name}' to tracklist.")
 
+    # Add a custom audio file to the library and insert it into the tracklist.
     def add_custom_track(self):
         custom_name = self.custom_track_name.get().strip()
         custom_artist = self.custom_track_artist.get().strip()
@@ -297,6 +305,7 @@ class CreateTracklist:
         self.custom_track_path.set("")
         self.status_text.set(f"Added custom track '{custom_name}' to tracklist.")
 
+    # Start playback of the saved tracklist.
     def play_tracklist(self):
         if not self.tracklist:
             self.status_text.set("List is empty. Please add some tracks in.")
@@ -319,6 +328,7 @@ class CreateTracklist:
         self._play_next_in_tracklist(self.playback_id) 
 
 
+    # Stop playback if active, otherwise start tracklist playback.
     def toggle_play_stop(self):
         if self.tracklist_playing or self.is_playing or self.is_paused:
             self.stop_playback()
@@ -327,6 +337,7 @@ class CreateTracklist:
             self.play_stop_button.configure(text = "Stop Tracklist")
             self.pause_resume_button.configure(text = "Pause")
     
+    # Pause or resume tracklist playback.
     def toggle_pause_resume(self):
         if self.is_paused:
             self.resume_playback()
@@ -335,10 +346,12 @@ class CreateTracklist:
             self.pause_playback()
             self.pause_resume_button.configure(text = "Resume")
     
+    # Toggle looping for the full tracklist.
     def toggle_tracklist_loop(self):
         self.tracklist_loop = not self.tracklist_loop
         return self.tracklist_loop 
     
+    # Toggle looping for one selected tracklist position.
     def toggle_selected_track_loop(self):
         index = self._get_selected_tracklist_index()
         if index is None:
@@ -352,6 +365,7 @@ class CreateTracklist:
             self.looped_positions.add(index)
             self.status_text.set(f"Loop enabled for track {index + 1}.")
     
+    # Toggle looping for a track selected by track number.
     def toggle_selected_track_number_loop(self):
         raw_track = self.track_input.get().strip()
         track_number = self._normalize_track_number_input(raw_track)
@@ -375,6 +389,7 @@ class CreateTracklist:
 
 
 
+    # Advance to the next playable track in the current direction.
     def _play_next_in_tracklist(self, playback_id):
         if playback_id != self.playback_id or not self.is_playing:
             return
@@ -444,6 +459,7 @@ class CreateTracklist:
 
 
 
+    # Update the loop button text to reflect the current loop state.
     def toggle_tracklist_loop_ui(self):
         self.tracklist_loop = not self.tracklist_loop 
         if self.tracklist_loop:
@@ -453,11 +469,13 @@ class CreateTracklist:
             self.loop_button.configure(text = "Loop Off")
             self.status_text.set("Tracklist loop is not enabled.")
     
+    # Wrap an index around the tracklist when looping is enabled.
     def _wrap_tracklist_index(self, index):
         if not self.tracklist:
             return None
         return index % len(self.tracklist)
     
+    # Restart the currently active looped track from the beginning.
     def _restart_active_track(self):
         if self.playback_mode == "single" and self.current_track_number is not None:
             if self.current_track_number in self.looped_track_numbers:
@@ -485,6 +503,7 @@ class CreateTracklist:
     
 
     
+    # Check whether a tracklist position or track number is looped.
     def _is_looped_track(self, index):
         if index < 0 or index >= len(self.tracklist):
             return False
@@ -492,6 +511,7 @@ class CreateTracklist:
         track_number = self.tracklist[index]
         return index in self.looped_positions or track_number in self.looped_track_numbers 
     
+    # Normalize user-entered track numbers before using them in the library.
     def _normalize_track_number_input(self, raw_track):
         raw_track = raw_track.strip()
         if not raw_track:
@@ -505,6 +525,7 @@ class CreateTracklist:
 
 
 
+    # Play the track at one specific tracklist index.
     def _play_track_at_index(self, index, playback_id = None):
         self.current_track_offset = 0.0
         if index < 0 or index >= len(self.tracklist):
@@ -537,6 +558,7 @@ class CreateTracklist:
     
 
 
+    # Move forward one track, or restart the active looped track if needed.
     def skip_track(self):
         if not self.tracklist_playing and self.playback_mode != "single":
             self.status_text.set("Nothing is currently playing.")
@@ -580,6 +602,7 @@ class CreateTracklist:
 
         self._play_track_at_index(next_index, self.playback_id)
 
+    # Move backward one track, or restart the active looped track if needed.
     def reverse_track(self):
         if not self.tracklist_playing and self.playback_mode != "single":
             self.status_text.set("Nothing is currently playing.")
@@ -625,6 +648,7 @@ class CreateTracklist:
             
 
 
+    # Resume paused tracklist playback.
     def resume_playback(self):
         self._mixer_check()
 
@@ -646,6 +670,7 @@ class CreateTracklist:
             self.after_id = self.window.after(1000, lambda: self._check_track_end(self.playback_id))
 
 
+    # Stop playback and reset the playback state.
     def stop_playback(self):
         self.is_playing = False
         self.is_paused = False
@@ -674,6 +699,7 @@ class CreateTracklist:
 
         self._update_progress_bar()
     
+    # Pause the active tracklist playback.
     def pause_playback(self):
         self._mixer_check()
 
@@ -692,6 +718,7 @@ class CreateTracklist:
             self.after_id = None
     
         
+    # Stop the current track and cancel the scheduled end check.
     def _stop_current_playback(self):
         if self.after_id:
             self.window.after_cancel(self.after_id)
@@ -700,11 +727,13 @@ class CreateTracklist:
         self._mixer_check()
         pygame.mixer.music.stop()
 
+    # Stop a single track directly through pygame.
     def _stop_single_track(self):
         self._mixer_check()
         pygame.mixer.music.stop()
 
 
+    # Detect when the current track ends and queue the next one if needed.
     def _check_track_end(self, playback_id = None):
         if playback_id is None:
             playback_id = self.playback_id
@@ -727,10 +756,12 @@ class CreateTracklist:
             self._play_next_in_tracklist(playback_id)
 
 
+    # Initialize pygame audio if it has not been started yet.
     def _mixer_check(self):
         if pygame.mixer.get_init() is None:
             pygame.mixer.init()
 
+    # Clear the tracklist and remove all loop markers.
     def reset_tracklist(self):
         self.tracklist.clear()
         self._refresh_tracklist_text()
@@ -739,6 +770,7 @@ class CreateTracklist:
         self.status_text.set("Tracklist cleared.")
 
     
+    # Play one track directly from the track number input.
     def _play_track_number(self, track_number):
         self.current_track_offset = 0.0
         name = self.library.get_name(track_number)
@@ -764,11 +796,13 @@ class CreateTracklist:
         else:
             self.status_text.set(f"Error playing '{name}'. Please try again.")
 
+    # Read the track number field and play that track.
     def play_track(self):
         raw = self.track_input.get().strip()
         track_number = raw.zfill(2) if raw.isdigit() else raw
         self._play_track_number(track_number)
 
+    # Shuffle the order of tracks in the current tracklist.
     def shuffle_tracklist(self):
         if len(self.tracklist) < 2:
             self.status_text.set("Need at least 2 tracks to shuffle.")
@@ -777,6 +811,7 @@ class CreateTracklist:
         self._refresh_tracklist_text()
         self.status_text.set("Tracklist shuffled.")
 
+    # Remove one track from the current tracklist.
     def remove_track(self):
         raw = self.track_input.get().strip()
         track_number = raw.zfill(2) if raw.isdigit() else raw
@@ -789,6 +824,7 @@ class CreateTracklist:
                 return
         self.status_text.set("Track not found in tracklist.")
 
+    # Play a track by its visible position in the tracklist.
     def play_specific_track(self):
         raw_position = self.tracklist_position.get().strip()
         if not raw_position.isdigit():
@@ -801,6 +837,7 @@ class CreateTracklist:
         track_number = self.tracklist[position - 1]
         self._play_track_number(track_number)
 
+    # Save the current tracklist to CSV.
     def save_tracklist(self):
         try:
             with self.tracklist_file.open("w", newline="", encoding="utf-8") as file:
@@ -816,6 +853,7 @@ class CreateTracklist:
         except OSError:
             self.status_text.set("Could not save tracklist.")
 
+    # Load the saved tracklist from CSV and recreate any custom tracks.
     def load_tracklist(self, auto_load = False):
         if not self.tracklist_file.exists():
             if not auto_load:
@@ -848,6 +886,7 @@ class CreateTracklist:
             if not auto_load:
                 self.status_text.set("Could not load saved tracklist.")
 
+    # Generate a new custom track ID that does not collide with existing tracks.
     def _next_custom_track_id(self):
         index = 1
         while True:
@@ -856,12 +895,14 @@ class CreateTracklist:
                 return track_id
             index += 1
     
+    # Reset the playback button labels after stopping.
     def _reset_playback_buttons(self):
         if getattr(self, "play_stop_button", None) is not None:
             self.play_stop_button.configure(text = "Play Tracklist")
         if getattr(self, "pause_resume_button", None) is not None:
             self.pause_resume_button.configure(text = "Pause")
 
+    # Read the selected tracklist position from the input field.
     def _get_selected_tracklist_index(self):
         raw_position = self.tracklist_position.get().strip()
         if not raw_position.isdigit():
