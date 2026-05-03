@@ -218,6 +218,7 @@ class TrackPlayer:
 
     
     # Toggle looping for the current single track.
+    # This flips a simple on/off flag that controls whether one track repeats.
     # Toggle looping for the current single track.
     def toggle_song_loop(self):
         self.song_loop = not self.song_loop
@@ -227,6 +228,7 @@ class TrackPlayer:
 
     
     # Add a selected track to the shared tracklist window.
+    # This opens the tracklist window if needed, checks for duplicates, and saves the updated list.
     # Add a selected track to the shared tracklist window.
     def add_track_to_tracklist(self, track_number):
         if not track_number:
@@ -256,17 +258,20 @@ class TrackPlayer:
         return True
     
     # Toggle single-track looping from the viewer window.
+    # This helper is shared with the viewer so both windows control the same loop setting.
     # Toggle looping for the single-track player from the viewer window.
     def toggle_loop_song(self):
         self.song_loop = not self.song_loop
         return self.song_loop
     
     # Return the active track metadata for the viewer progress bar.
+    # The viewer uses this to keep the seek slider and time label aligned with playback.
     # Return the active track information for the seekable progress slider.
     def get_current_track_info(self):
         return self.current_track_number, self.current_track_length, self.current_track_offset
     
     # Restart the current track from a new seek position.
+    # The viewer calls this when the user releases the progress slider after dragging.
     # Restart the active track from a new seek position.
     def seek_track(self, seek_seconds):
         if self.current_track_number is None or self.current_track_length <= 0:
@@ -293,6 +298,7 @@ class TrackPlayer:
 
 class LoginWindow:
     # Login form shown before the user can enter the main application.
+    # This window is shown first and only opens the main app after successful login.
     def __init__(self, root, on_success):
         self.root = root
         self.on_success = on_success
@@ -317,6 +323,7 @@ class LoginWindow:
         self.root.bind("<Return>", lambda event: self.login())
     
     # Validate the login credentials and open the main app if they match.
+    # The credentials are intentionally simple because this is a coursework demo app.
     def login(self):
         username = self.username_var.get().strip().lower()
         password = self.password_var.get().strip()
@@ -332,6 +339,8 @@ class LoginWindow:
             self.message_var.set("Invalid username or password, please try again.")
     
 settings_file = Path(__file__).with_name("saved_theme.txt")
+
+# Apply the theme that was saved in the previous session to a new window.
 def apply_saved_theme(window):
     theme_mode = font.load_theme_mode(settings_file)
     if theme_mode == "System":
@@ -339,6 +348,7 @@ def apply_saved_theme(window):
     else:
         font.apply_theme(window, theme_mode)
 
+# Create and launch the main application window after login succeeds.
 def launch_main_app():
     root = tk.Tk()
     font.configure()
@@ -357,6 +367,7 @@ def launch_main_app():
 
 
 
+# Create and launch the login window when the user is not already logged in.
 def launch_login():
     login_root = tk.Tk()
     font.configure()
@@ -375,6 +386,7 @@ def launch_login():
 
 
 
+# Start the correct entry point depending on whether a session file already exists.
 if __name__ == "__main__":
     if session_exists():
         launch_main_app()

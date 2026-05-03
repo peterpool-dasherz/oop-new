@@ -255,10 +255,12 @@ class TrackViewer:
 
 
     # Mark the slider as being dragged so automatic updates do not overwrite it.
+    # This keeps the slider from jumping while the user is choosing a new time.
     def _begin_seek(self, event = None):
         self.is_seeking = True
     
     # Update the time preview while the slider is being dragged.
+    # The label is updated live so the user can preview the chosen point.
     def seek_change(self, value):
         if self.current_track_length <= 0:
             return
@@ -272,6 +274,7 @@ class TrackViewer:
         self.progress_text.set(f"{self._format_time(seek_seconds)} / {self._format_time(self.current_track_length)}")
     
     # Seek the current track to the chosen position when the mouse is released.
+    # The TrackPlayer callback restarts playback from the selected point.
     def _end_seek(self, event = None):
         if self.on_seek_track is None:
             self.is_seeking = False
@@ -298,6 +301,7 @@ class TrackViewer:
     
     
     # Stop playback through the TrackPlayer callback and reset the cached state.
+    # This clears the slider and time display so the viewer returns to idle.
     def stop_playback(self):
         if self.on_stop_track is None:
             self.status_text.set("Error occurred. Please try again.")
@@ -319,6 +323,7 @@ class TrackViewer:
     
     
     # Start, pause, or resume playback depending on the current audio state.
+    # The same button handles all three states so the viewer stays compact.
     def toggle_play_pause(self):
         track_number = self._get_track_number_from_input()
         if not track_number:
@@ -367,6 +372,7 @@ class TrackViewer:
 
 
     # Toggle looping for the currently selected single track.
+    # This asks the main player to switch single-song loop mode on or off.
     def toggle_loop_song(self):
         if self.on_toggle_loop_song is None:
             self.status_text.set("Error occurred. Please try again.")
@@ -380,6 +386,7 @@ class TrackViewer:
         
 
     # Add the selected track to the shared tracklist.
+    # The TrackPlayer handles the actual append so the tracklist stays shared.
     def add_selected_to_tracklist(self):
         track_number = self._get_track_number_from_input()
         if not track_number:
@@ -395,6 +402,7 @@ class TrackViewer:
         else:
             self.status_text.set("Error occurred, please try again.")
 
+    # This file can also be run directly for quick testing of the viewer.
 if __name__ == "__main__":
     main_window = tk.Tk()
     font.configure()

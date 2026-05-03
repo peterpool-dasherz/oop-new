@@ -237,6 +237,7 @@ class TrackLibrary:
 
 
     # Stop the currently playing track.
+    # This is called by the main app when the user presses stop.
     def stop_track(self):
         if pygame is not None and pygame.mixer.get_init():
             pygame.mixer.music.stop()
@@ -245,6 +246,7 @@ class TrackLibrary:
 
 
     # Pause playback without resetting the current position.
+    # The current playback position is preserved so it can be resumed later.
     def pause_track(self):
         if pygame is not None and pygame.mixer.get_init():
             pygame.mixer.music.pause()
@@ -252,6 +254,7 @@ class TrackLibrary:
         return False
     
     # Resume a paused track from its current position.
+    # This continues from the exact point where playback was paused.
     def resume_track(self):
         if pygame is not None and pygame.mixer.get_init():
             pygame.mixer.music.unpause()
@@ -259,6 +262,7 @@ class TrackLibrary:
         return False
     
     # Read the track length so the UI can draw accurate progress displays.
+    # The viewer and tracklist windows use this to calculate slider percentages.
     def get_track_length(self, track_number: str):
         audio_path = self.get_audio_path(track_number)
         if audio_path is None or not audio_path.exists():
@@ -274,6 +278,7 @@ class TrackLibrary:
 
 
     # Save the full library state to disk.
+    # This writes track metadata, ratings, play counts, and audio paths to CSV.
     def save_lib_state(self, csv_path):
         path = Path(csv_path)  # convert the path-like value into a Path object
         with path.open("w", newline = "", encoding = "utf-8") as file:  # open the file for writing CSV data
@@ -288,6 +293,8 @@ class TrackLibrary:
                     audio_path = str(item.audio_path)  # keep the audio file path as text
                 writer.writerow([track_number, item.name, item.artist, item.rating, item.play_count, audio_path])  # write one track record to the CSV
 
+    # Load the saved library state from disk.
+    # Existing tracks are updated and missing custom tracks are recreated if needed.
     def load_lib_state(self, csv_path):
         path = Path(csv_path)  # convert the file path into a Path object
         if not path.exists():  # stop if the saved file does not exist

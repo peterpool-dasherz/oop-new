@@ -38,6 +38,7 @@ class UpdateTracks:
             font.apply_theme(self.window, self.theme_mode)  # apply the chosen theme
 
     # Replace all text in a Tk text widget with new content.
+    # This helper makes it easy to refresh the output panel cleanly.
     def set_text(self, text_area, content):
         text_area.configure(state = "normal")  # unlock the widget so text can be changed
         text_area.delete("1.0", tk.END)  # remove all existing text
@@ -45,6 +46,7 @@ class UpdateTracks:
         text_area.configure(state = "disabled")  # lock the widget again so the user cannot edit it directly
     
     # Validate the inputs and update the selected track's rating.
+    # The updated details are shown immediately so the user can confirm the change.
     def update_track(self):
         raw_track = self.track_input.get().strip()  # read the track number input
         raw_rating = self.rating_input.get().strip()  # read the rating input
@@ -73,6 +75,7 @@ class UpdateTracks:
         self.status_text.set(f"Successfully updated rating for track {track_number} to {raw_rating}.")  # confirm the successful update
             
 
+    # This file can also be run directly to test the rating editor.
 if __name__ == "__main__":
     root = tk.Tk()
     font.configure()
